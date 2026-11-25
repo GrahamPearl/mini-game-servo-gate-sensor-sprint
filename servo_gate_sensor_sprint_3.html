@@ -1,0 +1,3234 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Servo-Gate &amp; Sensor Sprint — Grade 8 &amp; 9 Coding &amp; Robotics</title>
+  <style>
+    /* =========================================================================
+       1. DESIGN TOKENS & THEME SYSTEM (PERSISTED DARK & LIGHT MODE)
+       ========================================================================= */
+    :root, [data-theme="dark"] {
+      --bg-app: #090e1a;
+      --bg-surface: #111827;
+      --bg-surface-2: #1e293b;
+      --bg-surface-3: #0f172a;
+      --border-color: #263245;
+      --border-strong: #3b4c68;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-primary: #3b82f6;
+      --accent-primary-hover: #2563eb;
+      --accent-success: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --canvas-bg: #0b1120;
+      --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+      --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.65);
+      --modal-backdrop: rgba(2, 6, 23, 0.82);
+    }
+
+    [data-theme="light"] {
+      --bg-app: #f1f5f9;
+      --bg-surface: #ffffff;
+      --bg-surface-2: #f8fafc;
+      --bg-surface-3: #e2e8f0;
+      --border-color: #cbd5e1;
+      --border-strong: #94a3b8;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --accent-primary: #2563eb;
+      --accent-primary-hover: #1d4ed8;
+      --accent-success: #059669;
+      --accent-warning: #d97706;
+      --accent-danger: #dc2626;
+      --canvas-bg: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 6px 18px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 14px 32px rgba(15, 23, 42, 0.14);
+      --modal-backdrop: rgba(15, 23, 42, 0.58);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      line-height: 1.45;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: var(--bg-surface-3); border-radius: 6px; }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
+
+    /* =========================================================================
+       2. TOP HEADER & LEVEL NAVIGATION
+       ========================================================================= */
+    header {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 18px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-inner {
+      max-width: 1700px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #06b6d4, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 18px;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+      flex-shrink: 0;
+    }
+
+    .brand h1 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(59, 130, 246, 0.16);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+    }
+    [data-theme="light"] .badge {
+      color: #1d4ed8;
+      background: rgba(37, 99, 235, 0.1);
+    }
+
+    .badge-locked {
+      background: rgba(245, 158, 11, 0.16);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+    [data-theme="light"] .badge-locked {
+      color: #b45309;
+    }
+
+    .badge-unlocked {
+      background: rgba(16, 185, 129, 0.16);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+    [data-theme="light"] .badge-unlocked {
+      color: #047857;
+    }
+
+    .brand-sub {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+    }
+
+    .header-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .level-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    /* Buttons */
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-surface-2);
+      color: var(--text-primary);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.14s ease;
+    }
+
+    button:hover:not(:disabled) {
+      border-color: var(--border-strong);
+      filter: brightness(1.07);
+    }
+
+    button:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    button.tab-active {
+      background-color: var(--accent-primary);
+      color: #ffffff;
+      border-color: var(--accent-primary);
+      box-shadow: 0 2px 10px rgba(59, 130, 246, 0.35);
+    }
+
+    button.tab-passed {
+      border-color: var(--accent-success);
+    }
+
+    button.btn-primary {
+      background-color: var(--accent-success);
+      color: #ffffff;
+      border-color: transparent;
+      font-weight: 700;
+    }
+
+    button.btn-blue {
+      background-color: var(--accent-primary);
+      color: #ffffff;
+      border-color: transparent;
+    }
+
+    button.btn-amber {
+      background-color: rgba(245, 158, 11, 0.16);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+    [data-theme="light"] button.btn-amber {
+      color: #b45309;
+      background-color: rgba(245, 158, 11, 0.15);
+    }
+
+    button.btn-danger {
+      background-color: rgba(239, 68, 68, 0.14);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+    [data-theme="light"] button.btn-danger {
+      color: #b91c1c;
+    }
+
+    /* =========================================================================
+       3. MAIN WORKSPACE GRID
+       ========================================================================= */
+    .main-container {
+      max-width: 1700px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: 1.18fr 0.82fr;
+      gap: 15px;
+      flex: 1;
+    }
+
+    @media (max-width: 1140px) {
+      .main-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .col-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 13px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* =========================================================================
+       4. TELEMETRY HUD & ARENA CANVAS
+       ========================================================================= */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 680px) {
+      .telemetry-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .hud-box {
+      background-color: var(--bg-surface-2);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 7px 10px;
+    }
+
+    .hud-label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+
+    .hud-val {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .color-pill {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      display: inline-block;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      background-color: var(--canvas-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 13px;
+      overflow: hidden;
+      aspect-ratio: 13 / 8;
+      width: 100%;
+      box-shadow: var(--shadow-md);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .toast-banner {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      z-index: 20;
+      max-width: 92%;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(8px);
+      border: 1px solid transparent;
+    }
+    .toast-success { background: rgba(6, 78, 59, 0.94); color: #a7f3d0; border-color: #10b981; }
+    .toast-error   { background: rgba(127, 29, 29, 0.94); color: #fecaca; border-color: #ef4444; }
+    .toast-info    { background: rgba(30, 58, 138, 0.94); color: #bfdbfe; border-color: #3b82f6; }
+
+    .hidden { display: none !important; }
+
+    /* =========================================================================
+       5. CHASSIS BUILDER & PORT ASSIGNMENTS
+       ========================================================================= */
+    .ports-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+      padding: 6px 8px;
+      background-color: var(--bg-surface-3);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.72rem;
+    }
+
+    .port-chip {
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--bg-surface-2);
+      border: 1px solid var(--border-color);
+      font-weight: 700;
+    }
+
+    .hw-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 6px;
+    }
+
+    .hw-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-surface-2);
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.14s ease;
+      user-select: none;
+    }
+
+    .hw-item.equipped {
+      border-color: var(--accent-primary);
+      background: rgba(59, 130, 246, 0.14);
+    }
+
+    .hw-item.locked {
+      cursor: not-allowed;
+      opacity: 0.82;
+    }
+
+    .hw-tag {
+      font-size: 0.63rem;
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-weight: 700;
+    }
+    .tag-sensor   { background: rgba(20, 184, 166, 0.2); color: #2dd4bf; }
+    .tag-actuator { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .tag-servo    { background: rgba(249, 115, 22, 0.2); color: #fb923c; }
+    [data-theme="light"] .tag-sensor   { color: #0f766e; }
+    [data-theme="light"] .tag-actuator { color: #1d4ed8; }
+    [data-theme="light"] .tag-servo    { color: #c2410c; }
+
+    /* =========================================================================
+       6. BLOCK PALETTE & WORKSPACE
+       ========================================================================= */
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+      max-height: 215px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    @media (max-width: 540px) {
+      .palette-grid { grid-template-columns: 1fr; }
+    }
+
+    .block-btn {
+      justify-content: space-between;
+      text-align: left;
+      padding: 6px 9px;
+      border-radius: 8px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .blk-control  { background: linear-gradient(135deg, #7e22ce, #6b21a8); }
+    .blk-sensor   { background: linear-gradient(135deg, #0f766e, #115e59); }
+    .blk-actuator { background: linear-gradient(135deg, #1d4ed8, #1e40af); }
+    .blk-servo180 { background: linear-gradient(135deg, #ea580c, #c2410c); }
+    .blk-servo360 { background: linear-gradient(135deg, #d97706, #b45309); }
+
+    .workspace-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 260px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    .prog-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 9px;
+      color: #ffffff;
+      font-size: 0.77rem;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.1s ease, outline 0.1s ease;
+    }
+
+    .prog-row.active-step {
+      outline: 3px solid #facc15;
+      box-shadow: 0 0 16px rgba(250, 204, 21, 0.65);
+      transform: scale(1.01);
+    }
+
+    .prog-row select {
+      background-color: rgba(15, 23, 42, 0.8);
+      color: #f8fafc;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      font-family: ui-monospace, monospace;
+      cursor: pointer;
+    }
+
+    .row-actions {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+
+    .row-actions button {
+      padding: 2px 6px;
+      font-size: 0.7rem;
+      background: rgba(0, 0, 0, 0.28);
+      border: none;
+      color: #ffffff;
+      border-radius: 5px;
+    }
+
+    .row-actions button:hover {
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .log-bar {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    /* =========================================================================
+       7. TEACHER LEVEL EDITOR PANEL
+       ========================================================================= */
+    .editor-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+
+    .tool-btn.selected-tool {
+      background-color: var(--accent-primary);
+      color: #ffffff;
+      border-color: var(--accent-primary);
+    }
+
+    .editor-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"], input[type="number"], select.ui-select, textarea.ui-textarea {
+      width: 100%;
+      background-color: var(--bg-surface-2);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 6px 9px;
+      font-size: 0.77rem;
+      font-family: inherit;
+    }
+
+    /* =========================================================================
+       8. MODALS (ASSESSMENT SUBMISSION, TEACHER GRADER, WIKI, JSON)
+       ========================================================================= */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: var(--modal-backdrop);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      max-width: 860px;
+      width: 100%;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .modal-head {
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .modal-body {
+      padding: 16px 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .wiki-card {
+      background-color: var(--bg-surface-2);
+      border: 1px solid var(--border-color);
+      border-radius: 11px;
+      padding: 11px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .wiki-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .wiki-link {
+      color: #38bdf8;
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    [data-theme="light"] .wiki-link {
+      color: #0369a1;
+      background: rgba(2, 132, 199, 0.1);
+    }
+    .wiki-link:hover {
+      text-decoration: underline;
+    }
+
+    table.assess-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.76rem;
+    }
+    table.assess-table th, table.assess-table td {
+      border: 1px solid var(--border-color);
+      padding: 6px 8px;
+      text-align: left;
+    }
+    table.assess-table th {
+      background-color: var(--bg-surface-2);
+      color: var(--text-secondary);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================================
+       HEADER & LEVEL NAVIGATION
+       ========================================================================= -->
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">🤖</div>
+        <div>
+          <h1>
+            Servo-Gate &amp; Sensor Sprint
+            <span class="badge">Grade 8 &amp; 9 Curriculum</span>
+          </h1>
+          <div class="brand-sub">Deterministic Sensors, Actuators &amp; 180°/360° Servo Robotics Simulator</div>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <nav class="level-tabs" id="levelTabs" aria-label="Curriculum Levels"></nav>
+
+        <button id="btnAssessment" class="btn-primary" title="Student Assessment Submission & Teacher Grading">
+          📋 Assessment &amp; Submit
+        </button>
+
+        <button id="btnToggleEditor" class="btn-amber" title="Open Teacher Level Builder">
+          🛠️ Level Editor
+        </button>
+
+        <button id="btnWikiGuide" title="Open Hardware & Wikipedia Reference Guide">
+          📚 Hardware &amp; Wiki
+        </button>
+
+        <button id="btnThemeToggle" title="Switch Dark / Light Theme">
+          ☀️ Light
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       MAIN WORKSPACE
+       ========================================================================= -->
+  <main class="main-container">
+
+    <!-- LEFT COLUMN: BRIEFING, TELEMETRY, ARENA CANVAS, CHASSIS BUILDER -->
+    <section class="col-stack">
+
+      <!-- Mission Briefing Card -->
+      <div class="card">
+        <div class="card-header">
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span id="lvlGradeBadge" class="badge">Grade 8</span>
+            <strong id="lvlTitle" style="font-size:0.98rem;">Level 1: Wall Stop &amp; Bumper Safety</strong>
+            <span id="lvlParBadge" class="mono" style="font-size:0.72rem; color:var(--text-secondary);">Par: 7 blocks</span>
+          </div>
+          <button id="btnHintToggle" style="font-size:0.73rem; padding:4px 9px;">💡 Logic Hint</button>
+        </div>
+        <p id="lvlDesc" style="font-size:0.82rem; color:var(--text-secondary);"></p>
+        <div id="lvlHintBox" class="hidden" style="margin-top:8px; padding:8px 10px; border-radius:8px; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.35); font-size:0.77rem;"></div>
+      </div>
+
+      <!-- Live Telemetry Readout Bar -->
+      <div class="telemetry-grid">
+        <div class="hud-box">
+          <div class="hud-label">Ultrasonic &amp; Bumper</div>
+          <div class="hud-val mono">
+            <span id="hudDist">120 cm</span>
+            <span id="hudBump" style="font-size:0.72rem; color:var(--text-secondary);">[Clear]</span>
+          </div>
+        </div>
+
+        <div class="hud-box">
+          <div class="hud-label">IR Floor &amp; LDR Light</div>
+          <div class="hud-val mono">
+            <span id="hudColorDot" class="color-pill"></span>
+            <span id="hudColor">WHITE</span>
+            <span id="hudLight" style="font-size:0.74rem; color:var(--text-secondary);">| 85%</span>
+          </div>
+        </div>
+
+        <div class="hud-box">
+          <div class="hud-label">180° &amp; 360° Servos</div>
+          <div class="hud-val mono">
+            <span id="hudServo180">0°</span>
+            <span style="color:var(--text-muted);">|</span>
+            <span id="hudServo360" style="font-size:0.76rem;">STOP</span>
+          </div>
+        </div>
+
+        <div class="hud-box">
+          <div class="hud-label">Pose, Bumps &amp; Aux</div>
+          <div class="hud-val mono" style="font-size:0.78rem;">
+            <span id="hudPose">(1,6) E</span>
+            <span id="hudAux" style="font-size:0.71rem; color:var(--text-secondary);">Bumps:0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive 2D Grid Arena Canvas -->
+      <div class="canvas-wrapper">
+        <canvas id="arenaCanvas"></canvas>
+        <div id="statusToast" class="toast-banner hidden"></div>
+      </div>
+
+      <!-- Teacher Level Editor Panel -->
+      <div id="teacherEditorCard" class="card hidden">
+        <div class="card-header">
+          <span class="card-title">🛠️ Teacher Level Editor (Click Grid Cells to Paint)</span>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button id="btnAddNewLevel" class="btn-primary">+ New Blank Level</button>
+            <button id="btnExportJson" class="btn-blue">📤 Export Level JSON</button>
+            <button id="btnImportJson">📥 Import JSON</button>
+            <button id="btnClearEditor" class="btn-danger">Clear Grid</button>
+          </div>
+        </div>
+
+        <div class="editor-form">
+          <div>
+            <label style="font-size:0.69rem; color:var(--text-secondary); font-weight:700;">Level Title</label>
+            <input type="text" id="edTitle" value="Custom Robotics Challenge" />
+          </div>
+          <div>
+            <label style="font-size:0.69rem; color:var(--text-secondary); font-weight:700;">Curriculum Grade</label>
+            <select id="edGrade" class="ui-select">
+              <option value="Grade 8">Grade 8</option>
+              <option value="Grade 9">Grade 9</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.69rem; color:var(--text-secondary); font-weight:700;">Robot Hardware Mode</label>
+            <select id="edHwMode" class="ui-select">
+              <option value="adjustable">Student Adjustable (In-Play)</option>
+              <option value="locked">Locked Preset Puzzle</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.69rem; color:var(--text-secondary); font-weight:700;">Par Block Count</label>
+            <input type="number" id="edPar" min="1" max="50" value="8" />
+          </div>
+        </div>
+
+        <div style="margin-bottom:8px;">
+          <label style="font-size:0.69rem; color:var(--text-secondary); font-weight:700;">Mission Briefing</label>
+          <input type="text" id="edDesc" value="Navigate to the green goal pad using your sensors and servos." />
+        </div>
+
+        <div style="font-size:0.71rem; font-weight:700; color:var(--text-secondary); margin-bottom:5px;">Select Arena Tile / Entity Brush (Click Start twice to rotate):</div>
+        <div class="editor-tools" id="editorTools"></div>
+      </div>
+
+      <!-- Robot Chassis Builder & Port Assignments -->
+      <div class="card">
+        <div class="card-header">
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span class="card-title">🔧 Chassis Builder &amp; Port Wiring</span>
+            <span id="hwModeBadge" class="badge badge-unlocked">Student Adjustable</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span id="hwBudgetText" class="mono" style="font-size:0.72rem; color:var(--text-secondary);">Load: 3/6 ports</span>
+            <button id="btnAutoEquip" class="btn-blue" style="font-size:0.72rem; padding:4px 8px;">
+              ⚡ Equip Recommended
+            </button>
+          </div>
+        </div>
+
+        <div class="ports-strip mono" id="portsStrip"></div>
+        <div class="hw-grid" id="hardwareGrid"></div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN: BLOCK PALETTE & CONTROL PROGRAM WORKSPACE -->
+    <section class="col-stack">
+
+      <!-- Execution Controls + Speed Slider -->
+      <div class="card" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px;">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px;">
+          <button id="btnRun" class="btn-primary">▶ Run Code</button>
+          <button id="btnStep" class="btn-blue">⏭ Step</button>
+          <button id="btnReset">↺ Reset</button>
+          <select id="speedSelect" class="ui-select mono" style="width:auto; padding:5px 8px; font-size:0.74rem;" title="Simulation Speed">
+            <option value="500">0.5x</option>
+            <option value="250" selected>1x</option>
+            <option value="125">2x</option>
+            <option value="60">4x</option>
+          </select>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+          <button id="btnLoadSolution" class="btn-amber">✨ Reference Solution</button>
+          <button id="btnClearBlocks" class="btn-danger">🗑 Clear</button>
+        </div>
+      </div>
+
+      <!-- Block Palette -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🧩 Block Palette (Click to Append)</span>
+          <span style="font-size:0.7rem; color:var(--text-secondary);">Color-coded by Hardware Role</span>
+        </div>
+        <div class="palette-grid" id="blockPalette"></div>
+      </div>
+
+      <!-- Program Stack Workspace -->
+      <div class="card" style="flex:1; display:flex; flex-direction:column;">
+        <div class="card-header">
+          <span class="card-title">📜 Robot Control Program</span>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span id="blockCountLabel" class="mono" style="font-size:0.74rem; color:var(--text-secondary);">Blocks: 3</span>
+            <span id="cycleCounter" class="mono" style="font-size:0.74rem; color:var(--text-secondary);">Step: 0 / 90</span>
+          </div>
+        </div>
+
+        <div class="workspace-list" id="workspaceList"></div>
+
+        <div class="log-bar mono">
+          <span id="execLog" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Ready. Build blocks or click "Reference Solution".</span>
+          <span id="starRating" style="color:#fbbf24; font-weight:700; flex-shrink:0;"></span>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- =========================================================================
+       MODAL 1: STUDENT ASSESSMENT SUBMISSION & TEACHER GRADER
+       ========================================================================= -->
+  <div id="assessmentModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <strong style="font-size:1rem;">📋 Classroom Assessment &amp; JSON Submission Portal</strong>
+          <button id="tabStudentSubmit" class="tab-active" style="font-size:0.73rem;">👩‍🎓 Student Submission</button>
+          <button id="tabTeacherGrade" style="font-size:0.73rem;">👨‍🏫 Teacher Grading Replay</button>
+        </div>
+        <button id="btnCloseAssessment">✕ Close</button>
+      </div>
+
+      <!-- STUDENT SUBMISSION VIEW -->
+      <div class="modal-body" id="studentSubmitView">
+        <div class="editor-form">
+          <div>
+            <label style="font-size:0.71rem; font-weight:700; color:var(--text-secondary);">Student Full Name *</label>
+            <input type="text" id="stuName" placeholder="e.g., Thabo Mokoena" />
+          </div>
+          <div>
+            <label style="font-size:0.71rem; font-weight:700; color:var(--text-secondary);">Class / Grade *</label>
+            <input type="text" id="stuClass" placeholder="e.g., Grade 8A or 9B" />
+          </div>
+          <div>
+            <label style="font-size:0.71rem; font-weight:700; color:var(--text-secondary);">Teacher / Assignment Code (Optional)</label>
+            <input type="text" id="stuTaskCode" placeholder="e.g., ROB-TERM3-01" />
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="assess-table" id="assessSummaryTable">
+            <thead>
+              <tr>
+                <th>Level</th>
+                <th>Status</th>
+                <th>Blocks (Par)</th>
+                <th>Steps</th>
+                <th>Wall Bumps</th>
+                <th>Rating</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center; padding-top:4px;">
+          <span style="font-size:0.74rem; color:var(--text-secondary);">
+            Includes integrity checksum, hardware loadout, and exact block-code programs.
+          </span>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button id="btnCopyAssessment" class="btn-blue">📋 Copy Online Submission JSON</button>
+            <button id="btnDownloadAssessment" class="btn-primary">💾 Download Offline Assessment (.json)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEACHER GRADING & REPLAY VIEW -->
+      <div class="modal-body hidden" id="teacherGradeView">
+        <p style="font-size:0.8rem; color:var(--text-secondary);">
+          Upload a student's <code>.json</code> assessment file or paste their online submission JSON below to verify their integrity hash, inspect their blocks, and replay their exact solution on the arena grid.
+        </p>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+          <input type="file" id="gradeFileInput" accept=".json" style="font-size:0.76rem;" />
+          <button id="btnParseGradeJson" class="btn-primary">🔍 Inspect &amp; Load Student Submission</button>
+        </div>
+        <textarea id="gradeJsonInput" rows="5" class="mono ui-textarea" placeholder="Or paste student assessment JSON payload here..."></textarea>
+        <div id="gradeReportOutput" class="hidden" style="background:var(--bg-surface-2); border:1px solid var(--border-color); border-radius:10px; padding:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 2: HARDWARE & WIKIPEDIA REFERENCE GUIDE
+       ========================================================================= -->
+  <div id="wikiModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <strong style="font-size:1rem;">📚 Grade 8 &amp; 9 Robotics Hardware &amp; Wikipedia Reference</strong>
+        <button id="btnCloseWiki">✕ Close</button>
+      </div>
+      <div class="modal-body" id="wikiModalBody"></div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 3: LEVEL JSON IMPORT / EXPORT
+       ========================================================================= -->
+  <div id="jsonModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-card" style="max-width:640px;">
+      <div class="modal-head">
+        <strong id="jsonModalTitle" style="font-size:0.95rem;">Level JSON Data</strong>
+        <button id="btnCloseJson">✕ Close</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.78rem; color:var(--text-secondary);">
+          Export or import custom level JSON files for offline sharing across classroom computers.
+        </p>
+        <textarea id="jsonTextarea" rows="10" class="mono ui-textarea"></textarea>
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+          <button id="btnCopyJson">📋 Copy JSON</button>
+          <button id="btnApplyJson" class="btn-primary">✔ Load Level JSON</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * SERVO-GATE & SENSOR SPRINT — DETERMINISTIC GRID SIMULATION ENGINE
+     * =========================================================================
+     * Grid: 13 Columns (x: 0..12) x 8 Rows (y: 0..7)
+     * Directions: 0 = East (Right), 1 = South (Down), 2 = West (Left), 3 = North (Up)
+     * Strict Collision Physics: Robot coordinates NEVER enter walls, closed gates,
+     * active optical barriers, or un-swept debris. Blocked drive attempts trigger
+     * the Touch Bumper sensor, increment collision count, and animate a bump bounce.
+     */
+
+    const COLS = 13;
+    const ROWS = 8;
+    const DIR_NAMES = ['East (0°)', 'South (90°)', 'West (180°)', 'North (270°)'];
+    const DIR_SHORT = ['E', 'S', 'W', 'N'];
+    const DX = [1, 0, -1, 0];
+    const DY = [0, 1, 0, -1];
+
+    // =========================================================================
+    // 1. HARDWARE CATALOG & WIKIPEDIA REFERENCES
+    // =========================================================================
+    const HARDWARE_CATALOG = [
+      {
+        id: 'ultrasonic',
+        name: 'Ultrasonic Sensor',
+        port: 'S1',
+        category: 'Sensor',
+        tagClass: 'tag-sensor',
+        desc: 'Emits ultrasonic pulses and measures echo return time to calculate obstacle distance in centimeters (cm).',
+        wikiUrl: 'https://en.wikipedia.org/wiki/Ultrasonic_transducer',
+        wikiLabel: 'Wikipedia: Ultrasonic Transducer'
+      },
+      {
+        id: 'ir_color',
+        name: 'IR Color Sensor',
+        port: 'S2',
+        category: 'Sensor',
+        tagClass: 'tag-sensor',
+        desc: 'Shines infrared/RGB light downward and measures reflected intensity to detect black lines and colored floor markers.',
+        wikiUrl: 'https://en.wikipedia.org/wiki/Infrared_sensor',
+        wikiLabel: 'Wikipedia: Infrared Sensor'
+      },
+      {
+        id: 'ldr',
+        name: 'LDR Light Sensor',
+        port: 'S3',
+        category: 'Sensor',
+        tagClass: 'tag-sensor',
+        desc: 'A photoresistor whose electrical resistance changes with ambient light intensity (0% dark tunnel to 100% bright).',
+        wikiUrl: 'https://en.wikipedia.org/wiki/Photoresistor',
+        wikiLabel: 'Wikipedia: Photoresistor (LDR)'
+      },
+      {
+        id: 'bumper',
+        name: 'Touch Bumper Switch',
+        port: 'S4',
+        category: 'Sensor',
+        tagClass: 'tag-sensor',
+        desc: 'A mechanical limit switch on the front chassis that closes a circuit when pressing against a solid wall or obstacle.',
+        wikiUrl: 'https://en.wikipedia.org/wiki/Limit_switch',
+        wikiLabel: 'Wikipedia: Limit Switch'
+      },
+      {
+        id: 'dc_motors',
+        name: 'Differential DC Motors',
+        port: 'M1/M2',
+        category: 'Actuator',
+        tagClass: 'tag-actuator',
+        desc: 'Left and right geared direct-current motors that drive the robot forward, backward, or pivot 90° left/right.',
+        wikiUrl: 'https://en.wikipedia.org/wiki/DC_motor',
+        wikiLabel: 'Wikipedia: DC Motor'
+      },
+      {
+        id: 'servo180',
+        name: '180° Positional Servo',
+        port: 'SV1',
+        category: 'Servo',
+        tagClass: 'tag-servo',
+        desc: 'Uses internal potentiometer feedback to rotate an arm to a precise angle between 0° and 180° to lift gate latches.',
+        wikiUrl: 'https://en.wikipedia.org/wiki/Servomotor',
+        wikiLabel: 'Wikipedia: Servomotor (180° Positional)'
+      },
+      {
+        id: 'servo360',
+        name: '360° Continuous Servo',
+        port: 'SV2',
+        category: 'Servo',
+        tagClass: 'tag-servo',
+        desc: 'Continuous-rotation servomotor that spins CW or CCW without angle stops to drive rotary sweepers and winches.',
+        wikiUrl: 'https://en.wikipedia.org/wiki/Servomotor',
+        wikiLabel: 'Wikipedia: Continuous Rotation Servo'
+      },
+      {
+        id: 'led_buzzer',
+        name: 'High-Beam LED & Buzzer',
+        port: 'OUT1',
+        category: 'Actuator',
+        tagClass: 'tag-actuator',
+        desc: 'High-brightness LED optical beacon and piezoelectric buzzer for activating light-sensitive gates and status alerts.',
+        wikiUrl: 'https://en.wikipedia.org/wiki/Buzzer',
+        wikiLabel: 'Wikipedia: Buzzer & LED'
+      },
+      {
+        id: 'magnet',
+        name: 'Electromagnet Gripper',
+        port: 'OUT2',
+        category: 'Actuator',
+        tagClass: 'tag-actuator',
+        desc: 'Generates a controlled magnetic field when energized (ON) to lift metallic cargo crates and release them (OFF).',
+        wikiUrl: 'https://en.wikipedia.org/wiki/Electromagnet',
+        wikiLabel: 'Wikipedia: Electromagnet'
+      }
+    ];
+
+    // =========================================================================
+    // 2. EIGHT CURRICULUM LEVELS (GRADE 8 & 9) WITH VERIFIED PASSING SOLUTIONS
+    // =========================================================================
+    function borderWalls() {
+      const w = [];
+      for (let x = 0; x < COLS; x++) {
+        w.push({ x, y: 0 });
+        w.push({ x, y: ROWS - 1 });
+      }
+      for (let y = 1; y < ROWS - 1; y++) {
+        w.push({ x: 0, y });
+        w.push({ x: COLS - 1, y });
+      }
+      return w;
+    }
+
+    function corridorWalls(openRow) {
+      const w = [];
+      for (let x = 1; x < COLS - 1; x++) {
+        for (let y = 1; y < ROWS - 1; y++) {
+          if (y !== openRow) w.push({ x, y });
+        }
+      }
+      return w;
+    }
+
+    const BUILTIN_LEVELS = [
+      {
+        id: 'lvl1',
+        short: '1. Wall & Bumper',
+        title: 'Level 1: Wall Stop & Bumper Safety',
+        grade: 'Grade 8',
+        parBlocks: 7,
+        hwMode: 'locked',
+        desc: 'Drive East along the L-shaped corridor. Use your Ultrasonic Distance Sensor (Distance <= 20 cm) or Touch Bumper to stop safely before hitting the East wall, turn Left 90°, and reach the Goal Pad.',
+        hint: 'Use "Repeat Until Goal Reached". Inside: If Ultrasonic Dist <= 20 cm -> Turn Left 90°; Else -> Drive Forward.',
+        recommendedHardware: ['ultrasonic', 'bumper', 'dc_motors'],
+        start: { x: 1, y: 6, dir: 0 },
+        goal: { x: 10, y: 1 },
+        walls: [
+          ...borderWalls(),
+          ...Array.from({ length: 8 }, (_, i) => [1, 2, 3, 4].map(r => ({ x: i + 1, y: r }))).flat()
+        ],
+        floors: [
+          ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(x => ({ x, y: 6, color: 'BLACK' })),
+          ...[2, 3, 4, 5].map(y => ({ x: 10, y, color: 'BLACK' }))
+        ],
+        darkZones: [], gates180: [], doors360: [], beacons: [], payloads: [], dropZones: [], debris: [],
+        solution: [
+          { type: 'REPEAT_GOAL' },
+          { type: 'IF_DIST', op: '<=', val: 20 },
+          { type: 'TURN', dir: 'LEFT' },
+          { type: 'ELSE' },
+          { type: 'DRIVE', dir: 'FORWARD' },
+          { type: 'END_IF' },
+          { type: 'END_REPEAT' }
+        ]
+      },
+      {
+        id: 'lvl2',
+        short: '2. 180° Servo Gate',
+        title: 'Level 2: Positional 180° Servo Gate',
+        grade: 'Grade 8',
+        parBlocks: 7,
+        hwMode: 'locked',
+        desc: 'A security latch gate at (6,4) blocks the corridor. Stop when Ultrasonic Distance <= 20 cm, set your 180° Positional Servo to 90° to lift the latch, and drive through to the Goal.',
+        hint: 'When Ultrasonic Distance <= 20 cm, set 180° Servo to 90°. Once unlocked, the Else branch drives forward!',
+        recommendedHardware: ['ultrasonic', 'servo180', 'dc_motors'],
+        start: { x: 1, y: 4, dir: 0 },
+        goal: { x: 11, y: 4 },
+        walls: [...borderWalls(), ...corridorWalls(4)],
+        floors: [],
+        darkZones: [],
+        gates180: [{ x: 6, y: 4, reqAngle: 90 }],
+        doors360: [], beacons: [], payloads: [], dropZones: [], debris: [],
+        solution: [
+          { type: 'REPEAT_GOAL' },
+          { type: 'IF_DIST', op: '<=', val: 20 },
+          { type: 'SERVO_180', angle: 90 },
+          { type: 'ELSE' },
+          { type: 'DRIVE', dir: 'FORWARD' },
+          { type: 'END_IF' },
+          { type: 'END_REPEAT' }
+        ]
+      },
+      {
+        id: 'lvl3',
+        short: '3. Line & Junction',
+        title: 'Level 3: IR Line Follower & Color Junction',
+        grade: 'Grade 8',
+        parBlocks: 8,
+        hwMode: 'adjustable',
+        desc: 'Follow the BLACK line using your IR Color Sensor. When you reach the RED junction marker at (6,6), turn Left 90° onto the BLUE spur line leading North to the Goal.',
+        hint: 'Inside Repeat Until Goal: If IR Floor Color == RED -> Turn Left 90°; End If; Drive Forward.',
+        recommendedHardware: ['ir_color', 'dc_motors'],
+        start: { x: 1, y: 6, dir: 0 },
+        goal: { x: 6, y: 1 },
+        walls: [
+          ...borderWalls(),
+          ...[1, 2, 3, 4].flatMap(x => [1, 2, 3, 4].map(y => ({ x, y }))),
+          ...[8, 9, 10, 11].flatMap(x => [1, 2, 3, 4].map(y => ({ x, y })))
+        ],
+        floors: [
+          ...[1, 2, 3, 4, 5].map(x => ({ x, y: 6, color: 'BLACK' })),
+          { x: 6, y: 6, color: 'RED' },
+          ...[2, 3, 4, 5].map(y => ({ x: 6, y, color: 'BLUE' }))
+        ],
+        darkZones: [], gates180: [], doors360: [], beacons: [], payloads: [], dropZones: [], debris: [],
+        solution: [
+          { type: 'REPEAT_GOAL' },
+          { type: 'IF_COLOR', color: 'RED' },
+          { type: 'TURN', dir: 'LEFT' },
+          { type: 'END_IF' },
+          { type: 'DRIVE', dir: 'FORWARD' },
+          { type: 'END_REPEAT' }
+        ]
+      },
+      {
+        id: 'lvl4',
+        short: '4. 360° Servo Sweeper',
+        title: 'Level 4: 360° Continuous Servo Sweeper',
+        grade: 'Grade 8',
+        parBlocks: 8,
+        hwMode: 'locked',
+        desc: 'Heavy rotating debris blocks the tunnel at (5,4) and (8,4). Unlike a 180° servo, a 360° Continuous Servo spins endlessly! Detect obstacles (Distance <= 20 cm) and spin your 360° Servo CW to sweep debris clear.',
+        hint: 'When Ultrasonic Distance <= 20 cm, spin 360° Servo CW to clear the debris ahead, then Stop 360° Servo.',
+        recommendedHardware: ['ultrasonic', 'servo360', 'dc_motors'],
+        start: { x: 1, y: 4, dir: 0 },
+        goal: { x: 11, y: 4 },
+        walls: [...borderWalls(), ...corridorWalls(4)],
+        floors: [],
+        darkZones: [], gates180: [], doors360: [], beacons: [], payloads: [], dropZones: [],
+        debris: [{ x: 5, y: 4 }, { x: 8, y: 4 }],
+        solution: [
+          { type: 'REPEAT_GOAL' },
+          { type: 'IF_DIST', op: '<=', val: 20 },
+          { type: 'SERVO_360', mode: 'CW' },
+          { type: 'SERVO_360', mode: 'STOP' },
+          { type: 'ELSE' },
+          { type: 'DRIVE', dir: 'FORWARD' },
+          { type: 'END_IF' },
+          { type: 'END_REPEAT' }
+        ]
+      },
+      {
+        id: 'lvl5',
+        short: '5. LDR Light Tunnel',
+        title: 'Level 5: Light-Activated Beacon Tunnel',
+        grade: 'Grade 9',
+        parBlocks: 7,
+        hwMode: 'adjustable',
+        desc: 'Inside the dark tunnel (x=4..7), ambient light drops to 15%. Use your LDR Light Sensor (Light < 30%) to switch ON your High-Beam LED (Green), illuminating the optical sensor gate at (8,4) so it opens!',
+        hint: 'When LDR Light < 30%, set Status LED to GREEN. Once the optical gate at (8,4) opens, Drive Forward to the Goal.',
+        recommendedHardware: ['ldr', 'led_buzzer', 'dc_motors'],
+        start: { x: 1, y: 4, dir: 0 },
+        goal: { x: 11, y: 4 },
+        walls: [...borderWalls(), ...corridorWalls(4)],
+        floors: [],
+        darkZones: [{ x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 }, { x: 7, y: 4 }],
+        gates180: [], doors360: [],
+        beacons: [{ x: 8, y: 4 }],
+        payloads: [], dropZones: [], debris: [],
+        solution: [
+          { type: 'REPEAT_GOAL' },
+          { type: 'IF_LIGHT', op: '<', val: 30 },
+          { type: 'SET_LED', color: 'GREEN' },
+          { type: 'END_IF' },
+          { type: 'DRIVE', dir: 'FORWARD' },
+          { type: 'END_REPEAT' }
+        ]
+      },
+      {
+        id: 'lvl6',
+        short: '6. Magnet Cargo',
+        title: 'Level 6: Magnetic Cargo Transporter',
+        grade: 'Grade 9',
+        parBlocks: 9,
+        hwMode: 'locked',
+        desc: 'Pick up the steel cargo crate on the RED pad (3,4) using your Electromagnet (ON), carry it to the BLUE sensor pad (8,4), and de-energize (OFF) to release it—which unlocks the cargo interlock gate at (9,4)!',
+        hint: 'If IR Floor Color == RED -> Electromagnet ON. If IR Floor Color == BLUE -> Electromagnet OFF. Then Drive Forward.',
+        recommendedHardware: ['ir_color', 'magnet', 'dc_motors'],
+        start: { x: 1, y: 4, dir: 0 },
+        goal: { x: 11, y: 4 },
+        walls: [...borderWalls(), ...corridorWalls(4)],
+        floors: [
+          { x: 3, y: 4, color: 'RED' },
+          { x: 8, y: 4, color: 'BLUE' }
+        ],
+        darkZones: [], gates180: [], doors360: [], beacons: [],
+        payloads: [{ x: 3, y: 4 }],
+        dropZones: [{ x: 8, y: 4, gateX: 9, gateY: 4 }],
+        debris: [],
+        solution: [
+          { type: 'REPEAT_GOAL' },
+          { type: 'IF_COLOR', color: 'RED' },
+          { type: 'SET_MAGNET', state: 'ON' },
+          { type: 'END_IF' },
+          { type: 'IF_COLOR', color: 'BLUE' },
+          { type: 'SET_MAGNET', state: 'OFF' },
+          { type: 'END_IF' },
+          { type: 'DRIVE', dir: 'FORWARD' },
+          { type: 'END_REPEAT' }
+        ]
+      },
+      {
+        id: 'lvl7',
+        short: '7. Dual-Servo Airlock',
+        title: 'Level 7: Dual-Servo Automated Airlock',
+        grade: 'Grade 9',
+        parBlocks: 11,
+        hwMode: 'adjustable',
+        desc: 'Stage 1 Airlock at (5,4) requires your 180° Servo set to 90°. Stage 2 Winch Door at (9,4) sits inside a dark sensor bay (Light < 30%) and requires 2 CW turns of your 360° Servo plus a Buzzer signal!',
+        hint: 'Use Ultrasonic Dist <= 20 cm to set 180° Servo to 90° for Stage 1. Inside the dark zone (LDR Light < 30%), beep Buzzer and spin 360° Servo CW twice.',
+        recommendedHardware: ['ultrasonic', 'ldr', 'servo180', 'servo360', 'led_buzzer', 'dc_motors'],
+        start: { x: 1, y: 4, dir: 0 },
+        goal: { x: 11, y: 4 },
+        walls: [...borderWalls(), ...corridorWalls(4)],
+        floors: [],
+        darkZones: [{ x: 7, y: 4 }, { x: 8, y: 4 }],
+        gates180: [{ x: 5, y: 4, reqAngle: 90 }],
+        doors360: [{ x: 9, y: 4, reqSpins: 2 }],
+        beacons: [], payloads: [], dropZones: [], debris: [],
+        solution: [
+          { type: 'REPEAT_GOAL' },
+          { type: 'IF_DIST', op: '<=', val: 20 },
+          { type: 'SERVO_180', angle: 90 },
+          { type: 'END_IF' },
+          { type: 'IF_LIGHT', op: '<', val: 30 },
+          { type: 'BEEP_BUZZER' },
+          { type: 'SERVO_360', mode: 'CW' },
+          { type: 'SERVO_360', mode: 'CW' },
+          { type: 'SERVO_360', mode: 'STOP' },
+          { type: 'END_IF' },
+          { type: 'DRIVE', dir: 'FORWARD' },
+          { type: 'END_REPEAT' }
+        ]
+      },
+      {
+        id: 'lvl8',
+        short: '8. Search & Rescue',
+        title: 'Level 8: Autonomous Search & Rescue Gauntlet',
+        grade: 'Grade 9',
+        parBlocks: 13,
+        hwMode: 'adjustable',
+        desc: 'Final Capstone! 1) Sweep debris at (3,4) with 360° Servo CW when Dist <= 20 cm. 2) Rescue steel pod on RED (5,4) with Electromagnet ON. 3) In dark zone (7,4), turn LED GREEN to open optical barrier (8,4). 4) Drop pod on BLUE (9,4) to unlock exit (10,4)!',
+        hint: 'Equip Ultrasonic, IR Color, LDR Light, 360° Servo, Electromagnet, High-Beam LED, and DC Motors (or click "Equip Recommended").',
+        recommendedHardware: ['ultrasonic', 'ir_color', 'ldr', 'servo360', 'magnet', 'led_buzzer', 'dc_motors'],
+        start: { x: 1, y: 4, dir: 0 },
+        goal: { x: 11, y: 4 },
+        walls: [...borderWalls(), ...corridorWalls(4)],
+        floors: [
+          { x: 5, y: 4, color: 'RED' },
+          { x: 9, y: 4, color: 'BLUE' }
+        ],
+        darkZones: [{ x: 7, y: 4 }],
+        gates180: [],
+        doors360: [],
+        beacons: [{ x: 8, y: 4 }],
+        payloads: [{ x: 5, y: 4 }],
+        dropZones: [{ x: 9, y: 4, gateX: 10, gateY: 4 }],
+        debris: [{ x: 3, y: 4 }],
+        solution: [
+          { type: 'REPEAT_GOAL' },
+          { type: 'IF_DIST', op: '<=', val: 20 },
+          { type: 'SERVO_360', mode: 'CW' },
+          { type: 'SERVO_360', mode: 'STOP' },
+          { type: 'END_IF' },
+          { type: 'IF_COLOR', color: 'RED' },
+          { type: 'SET_MAGNET', state: 'ON' },
+          { type: 'END_IF' },
+          { type: 'IF_LIGHT', op: '<', val: 30 },
+          { type: 'SET_LED', color: 'GREEN' },
+          { type: 'END_IF' },
+          { type: 'IF_COLOR', color: 'BLUE' },
+          { type: 'SET_MAGNET', state: 'OFF' },
+          { type: 'END_IF' },
+          { type: 'DRIVE', dir: 'FORWARD' },
+          { type: 'END_REPEAT' }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 3. BLOCK PALETTE CATALOG
+    // =========================================================================
+    const BLOCK_PALETTE = [
+      { type: 'REPEAT_GOAL', cls: 'blk-control', label: 'Repeat Until Goal Reached', reqHw: null },
+      { type: 'END_REPEAT',  cls: 'blk-control', label: 'End Repeat Loop', reqHw: null },
+      { type: 'ELSE',        cls: 'blk-control', label: 'Else', reqHw: null },
+      { type: 'END_IF',      cls: 'blk-control', label: 'End If', reqHw: null },
+
+      { type: 'IF_DIST',     cls: 'blk-sensor', label: 'If Ultrasonic Dist <= 20 cm', reqHw: 'ultrasonic', defaults: { op: '<=', val: 20 } },
+      { type: 'IF_COLOR',    cls: 'blk-sensor', label: 'If IR Floor Color == BLACK', reqHw: 'ir_color', defaults: { color: 'BLACK' } },
+      { type: 'IF_LIGHT',    cls: 'blk-sensor', label: 'If LDR Light < 30%', reqHw: 'ldr', defaults: { op: '<', val: 30 } },
+      { type: 'IF_BUMPER',   cls: 'blk-sensor', label: 'If Touch Bumper Pressed?', reqHw: 'bumper' },
+      { type: 'IF_COMPOUND', cls: 'blk-sensor', label: 'If Dist > 20 AND Light > 30%', reqHw: 'ultrasonic', defaults: { logic: 'AND' } },
+
+      { type: 'DRIVE',       cls: 'blk-actuator', label: 'Drive Forward (1 cell)', reqHw: 'dc_motors', defaults: { dir: 'FORWARD' } },
+      { type: 'TURN',        cls: 'blk-actuator', label: 'Turn Left 90°', reqHw: 'dc_motors', defaults: { dir: 'LEFT' } },
+      { type: 'SET_LED',     cls: 'blk-actuator', label: 'Set High-Beam LED [GREEN]', reqHw: 'led_buzzer', defaults: { color: 'GREEN' } },
+      { type: 'BEEP_BUZZER', cls: 'blk-actuator', label: 'Beep Piezo Buzzer', reqHw: 'led_buzzer' },
+      { type: 'SET_MAGNET',  cls: 'blk-actuator', label: 'Electromagnet [ON]', reqHw: 'magnet', defaults: { state: 'ON' } },
+
+      { type: 'SERVO_180',   cls: 'blk-servo180', label: '180° Servo -> Angle [90°]', reqHw: 'servo180', defaults: { angle: 90 } },
+      { type: 'SERVO_360',   cls: 'blk-servo360', label: '360° Servo -> Spin [CW]', reqHw: 'servo360', defaults: { mode: 'CW' } }
+    ];
+
+    // =========================================================================
+    // 4. APPLICATION, SIMULATION & STUDENT ASSESSMENT STATE
+    // =========================================================================
+    let levels = JSON.parse(JSON.stringify(BUILTIN_LEVELS));
+    let currentLvlIdx = 0;
+    let equippedHardware = new Set(['ultrasonic', 'bumper', 'dc_motors']);
+    let programBlocks = [];
+
+    // Tracks student assessment metrics per level ID
+    let assessmentRecords = {};
+
+    let robot = {
+      x: 1,
+      y: 6,
+      dir: 0,
+      servo180: 0,
+      servo360Mode: 'STOP',
+      servo360Angle: 0,
+      led: 'OFF',
+      magnetOn: false,
+      carryingPayload: false,
+      buzzerFlash: 0,
+      bumperTriggered: false,
+      bumpOffsetX: 0,
+      bumpOffsetY: 0,
+      collisions: 0
+    };
+
+    let simEntities = {
+      gates180: [],
+      doors360: [],
+      beacons: [],
+      payloads: [],
+      dropZones: [],
+      debris: []
+    };
+
+    let exec = {
+      running: false,
+      pc: 0,
+      activeIdx: -1,
+      steps: 0,
+      maxSteps: 90,
+      timer: null,
+      status: 'IDLE'
+    };
+
+    let editorMode = false;
+    let selectedBrush = 'WALL';
+
+    // =========================================================================
+    // 5. DOM REFERENCES
+    // =========================================================================
+    const canvas = document.getElementById('arenaCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const levelTabsEl = document.getElementById('levelTabs');
+    const lvlGradeBadgeEl = document.getElementById('lvlGradeBadge');
+    const lvlTitleEl = document.getElementById('lvlTitle');
+    const lvlParBadgeEl = document.getElementById('lvlParBadge');
+    const lvlDescEl = document.getElementById('lvlDesc');
+    const lvlHintBoxEl = document.getElementById('lvlHintBox');
+    const statusToastEl = document.getElementById('statusToast');
+
+    const hudDistEl = document.getElementById('hudDist');
+    const hudBumpEl = document.getElementById('hudBump');
+    const hudColorDotEl = document.getElementById('hudColorDot');
+    const hudColorEl = document.getElementById('hudColor');
+    const hudLightEl = document.getElementById('hudLight');
+    const hudServo180El = document.getElementById('hudServo180');
+    const hudServo360El = document.getElementById('hudServo360');
+    const hudPoseEl = document.getElementById('hudPose');
+    const hudAuxEl = document.getElementById('hudAux');
+
+    const portsStripEl = document.getElementById('portsStrip');
+    const hardwareGridEl = document.getElementById('hardwareGrid');
+    const hwModeBadgeEl = document.getElementById('hwModeBadge');
+    const hwBudgetTextEl = document.getElementById('hwBudgetText');
+
+    const blockPaletteEl = document.getElementById('blockPalette');
+    const workspaceListEl = document.getElementById('workspaceList');
+    const blockCountLabelEl = document.getElementById('blockCountLabel');
+    const cycleCounterEl = document.getElementById('cycleCounter');
+    const execLogEl = document.getElementById('execLog');
+    const starRatingEl = document.getElementById('starRating');
+
+    // =========================================================================
+    // 6. STRICT WALL & OBSTACLE COLLISION ENGINE
+    // =========================================================================
+    function isCellBlocked(gx, gy) {
+      // 1. Out of arena bounds
+      if (gx < 0 || gx >= COLS || gy < 0 || gy >= ROWS) return true;
+
+      const lvl = levels[currentLvlIdx];
+
+      // 2. Solid Wall cells (#)
+      if ((lvl.walls || []).some(w => w.x === gx && w.y === gy)) return true;
+
+      // 3. Closed 180° Servo Gates
+      if (simEntities.gates180.some(g => g.x === gx && g.y === gy && !g.open)) return true;
+
+      // 4. Closed 360° Rotary Winch Doors
+      if (simEntities.doors360.some(d => d.x === gx && d.y === gy && !d.open)) return true;
+
+      // 5. Unlit Optical Sensor Barriers
+      if (simEntities.beacons.some(b => b.x === gx && b.y === gy && !b.active)) return true;
+
+      // 6. Un-delivered Cargo Interlock Gates
+      if (simEntities.dropZones.some(dz => dz.gateX === gx && dz.gateY === gy && !dz.unlocked)) return true;
+
+      // 7. Un-swept Debris Crates
+      if (simEntities.debris.some(deb => deb.x === gx && deb.y === gy && !deb.cleared)) return true;
+
+      return false;
+    }
+
+    function readUltrasonicCm() {
+      for (let step = 1; step <= 12; step++) {
+        const tx = robot.x + DX[robot.dir] * step;
+        const ty = robot.y + DY[robot.dir] * step;
+        if (isCellBlocked(tx, ty)) {
+          return step * 20;
+        }
+      }
+      return 240;
+    }
+
+    function readBumperPressed() {
+      const fx = robot.x + DX[robot.dir];
+      const fy = robot.y + DY[robot.dir];
+      return robot.bumperTriggered || isCellBlocked(fx, fy);
+    }
+
+    function readFloorColor() {
+      const lvl = levels[currentLvlIdx];
+      if (lvl.goal.x === robot.x && lvl.goal.y === robot.y) return 'GREEN';
+      const tile = (lvl.floors || []).find(f => f.x === robot.x && f.y === robot.y);
+      return tile ? tile.color : 'WHITE';
+    }
+
+    function readAmbientLight() {
+      const lvl = levels[currentLvlIdx];
+      const inDark = (lvl.darkZones || []).some(dz => dz.x === robot.x && dz.y === robot.y);
+      return inDark ? 15 : 85;
+    }
+
+    function updateTelemetryUI() {
+      const dist = readUltrasonicCm();
+      const bump = readBumperPressed();
+      const color = readFloorColor();
+      const light = readAmbientLight();
+
+      hudDistEl.textContent = `${dist} cm`;
+      hudBumpEl.textContent = bump ? '[PRESSED]' : '[Clear]';
+      hudBumpEl.style.color = bump ? '#f87171' : 'var(--text-secondary)';
+
+      const dotColors = {
+        BLACK: '#0f172a',
+        RED: '#ef4444',
+        BLUE: '#3b82f6',
+        YELLOW: '#eab308',
+        GREEN: '#10b981',
+        WHITE: '#f8fafc'
+      };
+      hudColorDotEl.style.backgroundColor = dotColors[color] || '#f8fafc';
+      hudColorEl.textContent = color;
+      hudLightEl.textContent = `| ${light}%`;
+
+      hudServo180El.textContent = `${robot.servo180}°`;
+      hudServo360El.textContent = robot.servo360Mode;
+
+      hudPoseEl.textContent = `(${robot.x},${robot.y}) ${DIR_SHORT[robot.dir]}`;
+      hudAuxEl.textContent = `Bumps:${robot.collisions} | LED:${robot.led}`;
+    }
+
+    // =========================================================================
+    // 7. LEVEL & ARENA MANAGEMENT
+    // =========================================================================
+    function loadLevel(idx, preserveBlocks = false) {
+      stopExecution();
+      currentLvlIdx = idx;
+      const lvl = levels[idx];
+
+      equippedHardware = new Set(lvl.recommendedHardware || ['ultrasonic', 'bumper', 'dc_motors']);
+
+      lvlGradeBadgeEl.textContent = lvl.grade;
+      lvlTitleEl.textContent = lvl.title;
+      lvlParBadgeEl.textContent = `Par: ${lvl.parBlocks || 8} blocks`;
+      lvlDescEl.textContent = lvl.desc;
+      lvlHintBoxEl.textContent = lvl.hint || 'Use sensors inside a Repeat Until Goal loop.';
+      lvlHintBoxEl.classList.add('hidden');
+
+      // Sync Teacher Editor inputs
+      document.getElementById('edTitle').value = lvl.title;
+      document.getElementById('edGrade').value = lvl.grade;
+      document.getElementById('edHwMode').value = lvl.hwMode || 'adjustable';
+      document.getElementById('edPar').value = lvl.parBlocks || 8;
+      document.getElementById('edDesc').value = lvl.desc;
+
+      resetArena();
+
+      if (!preserveBlocks) {
+        const savedRec = assessmentRecords[lvl.id];
+        if (savedRec && savedRec.program && savedRec.program.length > 0) {
+          programBlocks = JSON.parse(JSON.stringify(savedRec.program));
+        } else {
+          programBlocks = [
+            { type: 'REPEAT_GOAL' },
+            { type: 'DRIVE', dir: 'FORWARD' },
+            { type: 'END_REPEAT' }
+          ];
+        }
+      }
+
+      renderLevelTabs();
+      renderChassisBuilder();
+      renderWorkspace();
+    }
+
+    function resetArena() {
+      stopExecution();
+      const lvl = levels[currentLvlIdx];
+
+      robot = {
+        x: lvl.start.x,
+        y: lvl.start.y,
+        dir: lvl.start.dir,
+        servo180: 0,
+        servo360Mode: 'STOP',
+        servo360Angle: 0,
+        led: 'OFF',
+        magnetOn: false,
+        carryingPayload: false,
+        buzzerFlash: 0,
+        bumperTriggered: false,
+        bumpOffsetX: 0,
+        bumpOffsetY: 0,
+        collisions: 0
+      };
+
+      simEntities = {
+        gates180: (lvl.gates180 || []).map(g => ({ ...g, open: false })),
+        doors360: (lvl.doors360 || []).map(d => ({ ...d, spins: 0, open: false })),
+        beacons: (lvl.beacons || []).map(b => ({ ...b, active: false })),
+        payloads: (lvl.payloads || []).map(p => ({ ...p, carried: false, delivered: false })),
+        dropZones: (lvl.dropZones || []).map(dz => ({ ...dz, unlocked: false })),
+        debris: (lvl.debris || []).map(deb => ({ ...deb, cleared: false }))
+      };
+
+      exec = {
+        running: false,
+        pc: 0,
+        activeIdx: -1,
+        steps: 0,
+        maxSteps: 90,
+        timer: null,
+        status: 'IDLE'
+      };
+
+      hideToast();
+      starRatingEl.textContent = '';
+      cycleCounterEl.textContent = `Step: 0 / ${exec.maxSteps}`;
+      execLogEl.textContent = 'Arena ready. Click "Run Code" or "Reference Solution".';
+      renderWorkspace();
+      updateTelemetryUI();
+    }
+
+    function showToast(msg, type = 'info') {
+      statusToastEl.textContent = msg;
+      statusToastEl.className = `toast-banner toast-${type}`;
+    }
+
+    function hideToast() {
+      statusToastEl.classList.add('hidden');
+    }
+
+    // =========================================================================
+    // 8. RENDERING CHASSIS BUILDER, TABS, PALETTE & WORKSPACE
+    // =========================================================================
+    function renderLevelTabs() {
+      levelTabsEl.innerHTML = '';
+      levels.forEach((lvl, i) => {
+        const btn = document.createElement('button');
+        const rec = assessmentRecords[lvl.id];
+        const passed = rec && rec.status === 'Passed';
+        btn.textContent = `${passed ? '✔ ' : ''}${lvl.short}`;
+        if (i === currentLvlIdx) btn.classList.add('tab-active');
+        if (passed) btn.classList.add('tab-passed');
+        btn.addEventListener('click', () => loadLevel(i, false));
+        levelTabsEl.appendChild(btn);
+      });
+    }
+
+    function renderChassisBuilder() {
+      const lvl = levels[currentLvlIdx];
+      const isLocked = lvl.hwMode === 'locked';
+
+      hwModeBadgeEl.textContent = isLocked ? '🔒 Locked Preset Puzzle' : '🔓 Student Adjustable (In-Play)';
+      hwModeBadgeEl.className = `badge ${isLocked ? 'badge-locked' : 'badge-unlocked'}`;
+      hwBudgetTextEl.textContent = `Equipped: ${equippedHardware.size} / ${HARDWARE_CATALOG.length} modules`;
+
+      // Render Port Wiring Strip
+      portsStripEl.innerHTML = '';
+      HARDWARE_CATALOG.forEach(hw => {
+        if (equippedHardware.has(hw.id)) {
+          const span = document.createElement('span');
+          span.className = 'port-chip';
+          span.textContent = `${hw.port}: ${hw.name.split(' ')[0]}`;
+          portsStripEl.appendChild(span);
+        }
+      });
+
+      // Render Hardware Selection Cards
+      hardwareGridEl.innerHTML = '';
+      HARDWARE_CATALOG.forEach(hw => {
+        const isEq = equippedHardware.has(hw.id);
+        const div = document.createElement('div');
+        div.className = `hw-item ${isEq ? 'equipped' : ''} ${isLocked ? 'locked' : ''}`;
+        div.title = isLocked ? `Locked by Teacher Preset: ${hw.desc}` : hw.desc;
+        div.innerHTML = `
+          <span>${isEq ? '✅' : '⬜'} <strong class="mono" style="font-size:0.68rem;">[${hw.port}]</strong> ${hw.name}</span>
+          <span class="hw-tag ${hw.tagClass}">${hw.category}</span>
+        `;
+        div.addEventListener('click', () => {
+          if (isLocked) {
+            showToast('🔒 Hardware loadout is locked for this preset puzzle!', 'info');
+            return;
+          }
+          if (exec.running) stopExecution();
+          if (equippedHardware.has(hw.id)) {
+            equippedHardware.delete(hw.id);
+          } else {
+            equippedHardware.add(hw.id);
+          }
+          renderChassisBuilder();
+        });
+        hardwareGridEl.appendChild(div);
+      });
+    }
+
+    function renderPalette() {
+      blockPaletteEl.innerHTML = '';
+      BLOCK_PALETTE.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = `block-btn ${item.cls}`;
+        btn.innerHTML = `<span>${item.label}</span><span style="opacity:0.8; font-size:0.67rem;">+ Add</span>`;
+        btn.addEventListener('click', () => {
+          if (exec.running) stopExecution();
+          const newBlock = { type: item.type, ...(item.defaults ? { ...item.defaults } : {}) };
+          programBlocks.push(newBlock);
+          renderWorkspace();
+        });
+        blockPaletteEl.appendChild(btn);
+      });
+    }
+
+    function computeIndents() {
+      let indent = 0;
+      return programBlocks.map(b => {
+        if (b.type === 'END_REPEAT' || b.type === 'END_IF' || b.type === 'ELSE') {
+          indent = Math.max(0, indent - 1);
+        }
+        const cur = indent;
+        if (b.type === 'REPEAT_GOAL' || b.type.startsWith('IF_') || b.type === 'ELSE') {
+          indent++;
+        }
+        return cur;
+      });
+    }
+
+    function getBlockClass(type) {
+      const found = BLOCK_PALETTE.find(p => p.type === type);
+      return found ? found.cls : 'blk-control';
+    }
+
+    function renderWorkspace() {
+      blockCountLabelEl.textContent = `Blocks: ${programBlocks.length}`;
+      workspaceListEl.innerHTML = '';
+
+      if (programBlocks.length === 0) {
+        workspaceListEl.innerHTML = `<div style="text-align:center; padding:32px 12px; color:var(--text-muted); font-size:0.79rem; border:1px dashed var(--border-strong); border-radius:10px;">
+          No blocks in program. Click blocks from the palette above or click <strong>✨ Reference Solution</strong>.
+        </div>`;
+        return;
+      }
+
+      const indents = computeIndents();
+      programBlocks.forEach((b, idx) => {
+        const row = document.createElement('div');
+        row.className = `prog-row ${getBlockClass(b.type)} ${idx === exec.activeIdx ? 'active-step' : ''}`;
+        row.style.marginLeft = `${indents[idx] * 16}px`;
+
+        const left = document.createElement('div');
+        left.style.display = 'flex';
+        left.style.flexWrap = 'wrap';
+        left.style.alignItems = 'center';
+        left.style.gap = '6px';
+        left.innerHTML = renderBlockControls(b, idx);
+
+        const actions = document.createElement('div');
+        actions.className = 'row-actions';
+        actions.innerHTML = `
+          <button data-act="up" data-idx="${idx}" title="Move Up">▲</button>
+          <button data-act="down" data-idx="${idx}" title="Move Down">▼</button>
+          <button data-act="del" data-idx="${idx}" title="Delete">✕</button>
+        `;
+
+        row.appendChild(left);
+        row.appendChild(actions);
+        workspaceListEl.appendChild(row);
+      });
+
+      workspaceListEl.querySelectorAll('select').forEach(sel => {
+        sel.addEventListener('change', e => {
+          const i = Number(e.target.dataset.idx);
+          const k = e.target.dataset.key;
+          const v = isNaN(Number(e.target.value)) ? e.target.value : Number(e.target.value);
+          programBlocks[i][k] = v;
+        });
+      });
+
+      workspaceListEl.querySelectorAll('button[data-act]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          if (exec.running) stopExecution();
+          const i = Number(e.currentTarget.dataset.idx);
+          const act = e.currentTarget.dataset.act;
+          if (act === 'del') programBlocks.splice(i, 1);
+          if (act === 'up' && i > 0) [programBlocks[i - 1], programBlocks[i]] = [programBlocks[i], programBlocks[i - 1]];
+          if (act === 'down' && i < programBlocks.length - 1) [programBlocks[i + 1], programBlocks[i]] = [programBlocks[i], programBlocks[i + 1]];
+          renderWorkspace();
+        });
+      });
+    }
+
+    function renderBlockControls(b, idx) {
+      const n = `<span class="mono" style="opacity:0.65; font-size:0.69rem;">${idx + 1}.</span>`;
+      switch (b.type) {
+        case 'REPEAT_GOAL':
+          return `${n}<span>🔁 Repeat Until Goal Reached</span>`;
+        case 'END_REPEAT':
+          return `${n}<span>End Repeat Loop</span>`;
+        case 'ELSE':
+          return `${n}<span>Else</span>`;
+        case 'END_IF':
+          return `${n}<span>End If</span>`;
+        case 'IF_DIST':
+          return `${n}<span>📡 If Ultrasonic Dist</span>
+            <select data-idx="${idx}" data-key="op">
+              <option value="<=" ${b.op === '<=' ? 'selected' : ''}>&lt;=</option>
+              <option value=">" ${b.op === '>' ? 'selected' : ''}>&gt;</option>
+            </select>
+            <select data-idx="${idx}" data-key="val">
+              ${[20, 40, 60, 80].map(v => `<option value="${v}" ${b.val === v ? 'selected' : ''}>${v} cm</option>`).join('')}
+            </select><span>then</span>`;
+        case 'IF_COLOR':
+          return `${n}<span>🎨 If IR Floor Color ==</span>
+            <select data-idx="${idx}" data-key="color">
+              ${['BLACK', 'RED', 'BLUE', 'YELLOW', 'GREEN', 'WHITE'].map(c => `<option value="${c}" ${b.color === c ? 'selected' : ''}>${c}</option>`).join('')}
+            </select><span>then</span>`;
+        case 'IF_LIGHT':
+          return `${n}<span>☀️ If LDR Light</span>
+            <select data-idx="${idx}" data-key="op">
+              <option value="<" ${b.op === '<' ? 'selected' : ''}>&lt;</option>
+              <option value=">" ${b.op === '>' ? 'selected' : ''}>&gt;</option>
+            </select>
+            <select data-idx="${idx}" data-key="val">
+              ${[30, 50, 70].map(v => `<option value="${v}" ${b.val === v ? 'selected' : ''}>${v}%</option>`).join('')}
+            </select><span>then</span>`;
+        case 'IF_BUMPER':
+          return `${n}<span>🔘 If Touch Bumper Pressed? then</span>`;
+        case 'IF_COMPOUND':
+          return `${n}<span>🛡️ If Dist &gt; 20 cm</span>
+            <select data-idx="${idx}" data-key="logic">
+              <option value="AND" ${b.logic === 'AND' ? 'selected' : ''}>AND</option>
+              <option value="OR" ${b.logic === 'OR' ? 'selected' : ''}>OR</option>
+            </select><span>Light &gt; 30% then</span>`;
+        case 'DRIVE':
+          return `${n}<span>⚙️ Drive</span>
+            <select data-idx="${idx}" data-key="dir">
+              <option value="FORWARD" ${b.dir === 'FORWARD' ? 'selected' : ''}>Forward (1 cell)</option>
+              <option value="BACKWARD" ${b.dir === 'BACKWARD' ? 'selected' : ''}>Backward (1 cell)</option>
+            </select>`;
+        case 'TURN':
+          return `${n}<span>🧭 Turn</span>
+            <select data-idx="${idx}" data-key="dir">
+              <option value="LEFT" ${b.dir === 'LEFT' ? 'selected' : ''}>Left 90°</option>
+              <option value="RIGHT" ${b.dir === 'RIGHT' ? 'selected' : ''}>Right 90°</option>
+            </select>`;
+        case 'SET_LED':
+          return `${n}<span>💡 High-Beam LED</span>
+            <select data-idx="${idx}" data-key="color">
+              ${['GREEN', 'RED', 'BLUE', 'OFF'].map(c => `<option value="${c}" ${b.color === c ? 'selected' : ''}>${c}</option>`).join('')}
+            </select>`;
+        case 'BEEP_BUZZER':
+          return `${n}<span>🔊 Beep Piezo Buzzer</span>`;
+        case 'SET_MAGNET':
+          return `${n}<span>🧲 Electromagnet</span>
+            <select data-idx="${idx}" data-key="state">
+              <option value="ON" ${b.state === 'ON' ? 'selected' : ''}>ON (Grab)</option>
+              <option value="OFF" ${b.state === 'OFF' ? 'selected' : ''}>OFF (Release)</option>
+            </select>`;
+        case 'SERVO_180':
+          return `${n}<span>🦾 180° Servo -&gt; Angle</span>
+            <select data-idx="${idx}" data-key="angle">
+              ${[0, 45, 90, 135, 180].map(a => `<option value="${a}" ${b.angle === a ? 'selected' : ''}>${a}°</option>`).join('')}
+            </select>`;
+        case 'SERVO_360':
+          return `${n}<span>🔄 360° Servo -&gt; Spin</span>
+            <select data-idx="${idx}" data-key="mode">
+              <option value="CW" ${b.mode === 'CW' ? 'selected' : ''}>CW (Clockwise)</option>
+              <option value="CCW" ${b.mode === 'CCW' ? 'selected' : ''}>CCW (Counter-CW)</option>
+              <option value="STOP" ${b.mode === 'STOP' ? 'selected' : ''}>STOP</option>
+            </select>`;
+        default:
+          return `${n}<span>${b.type}</span>`;
+      }
+    }
+
+    // =========================================================================
+    // 9. DETERMINISTIC INTERPRETER WITH STRICT WALL COLLISION HANDLING
+    // =========================================================================
+    function getStepDelay() {
+      return Number(document.getElementById('speedSelect').value) || 250;
+    }
+
+    function startExecution() {
+      if (programBlocks.length === 0) {
+        showToast('Add blocks to your program first!', 'error');
+        return;
+      }
+      if (exec.status === 'SUCCESS' || exec.status === 'ERROR') {
+        resetArena();
+      }
+      exec.running = true;
+      document.getElementById('btnRun').textContent = '⏸ Pause';
+      hideToast();
+      exec.timer = setInterval(executeStep, getStepDelay());
+    }
+
+    function stopExecution() {
+      exec.running = false;
+      if (exec.timer) {
+        clearInterval(exec.timer);
+        exec.timer = null;
+      }
+      document.getElementById('btnRun').textContent = '▶ Run Code';
+    }
+
+    function checkGoal() {
+      const lvl = levels[currentLvlIdx];
+      return robot.x === lvl.goal.x && robot.y === lvl.goal.y;
+    }
+
+    function jumpToFalseBranch(ifIdx) {
+      let depth = 0;
+      for (let i = ifIdx; i < programBlocks.length; i++) {
+        const t = programBlocks[i].type;
+        if (t.startsWith('IF_')) depth++;
+        else if (t === 'ELSE' && depth === 1) return i + 1;
+        else if (t === 'END_IF') {
+          depth--;
+          if (depth === 0) return i + 1;
+        }
+      }
+      return programBlocks.length;
+    }
+
+    function jumpPastEndIf(elseIdx) {
+      let depth = 1;
+      for (let i = elseIdx + 1; i < programBlocks.length; i++) {
+        const t = programBlocks[i].type;
+        if (t.startsWith('IF_')) depth++;
+        else if (t === 'END_IF') {
+          depth--;
+          if (depth === 0) return i + 1;
+        }
+      }
+      return programBlocks.length;
+    }
+
+    function findRepeatStart(endIdx) {
+      let depth = 0;
+      for (let i = endIdx; i >= 0; i--) {
+        if (programBlocks[i].type === 'END_REPEAT') depth++;
+        else if (programBlocks[i].type === 'REPEAT_GOAL') {
+          depth--;
+          if (depth === 0) return i;
+        }
+      }
+      return 0;
+    }
+
+    function findRepeatEnd(startIdx) {
+      let depth = 0;
+      for (let i = startIdx; i < programBlocks.length; i++) {
+        if (programBlocks[i].type === 'REPEAT_GOAL') depth++;
+        else if (programBlocks[i].type === 'END_REPEAT') {
+          depth--;
+          if (depth === 0) return i;
+        }
+      }
+      return programBlocks.length;
+    }
+
+    function verifyHardwareEquipped(blockType) {
+      const def = BLOCK_PALETTE.find(p => p.type === blockType);
+      if (def && def.reqHw && !equippedHardware.has(def.reqHw)) {
+        const hwInfo = HARDWARE_CATALOG.find(h => h.id === def.reqHw);
+        return hwInfo ? hwInfo.name : def.reqHw;
+      }
+      return null;
+    }
+
+    function executeStep() {
+      if (exec.status === 'SUCCESS' || exec.status === 'ERROR') {
+        stopExecution();
+        return;
+      }
+
+      if (checkGoal()) {
+        completeLevel();
+        return;
+      }
+
+      if (exec.steps >= exec.maxSteps) {
+        exec.status = 'ERROR';
+        stopExecution();
+        recordLevelAttempt('Attempted', 0);
+        showToast('⏱ Step limit (90) reached. Check your loop or turn logic.', 'error');
+        execLogEl.textContent = 'HALTED: Maximum step count reached.';
+        return;
+      }
+
+      if (exec.pc >= programBlocks.length) {
+        stopExecution();
+        exec.activeIdx = -1;
+        renderWorkspace();
+        if (!checkGoal()) {
+          recordLevelAttempt('Attempted', 0);
+          showToast('Program ended before reaching the green Goal Pad.', 'info');
+          execLogEl.textContent = 'Program finished. Wrap commands in a Repeat Until Goal loop.';
+        }
+        return;
+      }
+
+      const idx = exec.pc;
+      const b = programBlocks[idx];
+
+      const missingHw = verifyHardwareEquipped(b.type);
+      if (missingHw) {
+        exec.status = 'ERROR';
+        stopExecution();
+        showToast(`⚠️ Hardware Missing: Equip "${missingHw}" in Chassis Builder!`, 'error');
+        execLogEl.textContent = `HARDWARE FAULT: ${missingHw} not equipped.`;
+        return;
+      }
+
+      exec.steps++;
+      exec.activeIdx = idx;
+      cycleCounterEl.textContent = `Step: ${exec.steps} / ${exec.maxSteps}`;
+      renderWorkspace();
+
+      switch (b.type) {
+        case 'REPEAT_GOAL': {
+          if (checkGoal()) {
+            exec.pc = findRepeatEnd(idx) + 1;
+          } else {
+            execLogEl.textContent = `Step ${exec.steps}: Entering Repeat Until Goal loop...`;
+            exec.pc++;
+          }
+          break;
+        }
+
+        case 'END_REPEAT': {
+          if (!checkGoal()) {
+            exec.pc = findRepeatStart(idx) + 1;
+            execLogEl.textContent = `Step ${exec.steps}: Repeating loop...`;
+          } else {
+            exec.pc++;
+          }
+          break;
+        }
+
+        case 'IF_DIST': {
+          const d = readUltrasonicCm();
+          const cond = b.op === '<=' ? d <= b.val : d > b.val;
+          execLogEl.textContent = `Step ${exec.steps}: Ultrasonic (${d} cm) ${b.op} ${b.val} cm -> ${cond ? 'TRUE' : 'FALSE'}`;
+          exec.pc = cond ? idx + 1 : jumpToFalseBranch(idx);
+          break;
+        }
+
+        case 'IF_COLOR': {
+          const c = readFloorColor();
+          const cond = c === b.color;
+          execLogEl.textContent = `Step ${exec.steps}: IR Floor (${c}) == ${b.color} -> ${cond ? 'TRUE' : 'FALSE'}`;
+          exec.pc = cond ? idx + 1 : jumpToFalseBranch(idx);
+          break;
+        }
+
+        case 'IF_LIGHT': {
+          const l = readAmbientLight();
+          const cond = b.op === '<' ? l < b.val : l > b.val;
+          execLogEl.textContent = `Step ${exec.steps}: LDR Light (${l}%) ${b.op} ${b.val}% -> ${cond ? 'TRUE' : 'FALSE'}`;
+          exec.pc = cond ? idx + 1 : jumpToFalseBranch(idx);
+          break;
+        }
+
+        case 'IF_BUMPER': {
+          const pressed = readBumperPressed();
+          execLogEl.textContent = `Step ${exec.steps}: Touch Bumper Pressed? -> ${pressed ? 'TRUE' : 'FALSE'}`;
+          exec.pc = pressed ? idx + 1 : jumpToFalseBranch(idx);
+          break;
+        }
+
+        case 'IF_COMPOUND': {
+          const dOk = readUltrasonicCm() > 20;
+          const lOk = readAmbientLight() > 30;
+          const cond = b.logic === 'AND' ? (dOk && lOk) : (dOk || lOk);
+          execLogEl.textContent = `Step ${exec.steps}: Compound (${dOk} ${b.logic} ${lOk}) -> ${cond ? 'TRUE' : 'FALSE'}`;
+          exec.pc = cond ? idx + 1 : jumpToFalseBranch(idx);
+          break;
+        }
+
+        case 'ELSE': {
+          exec.pc = jumpPastEndIf(idx);
+          break;
+        }
+
+        case 'END_IF': {
+          exec.pc++;
+          break;
+        }
+
+        case 'DRIVE': {
+          const stepSign = b.dir === 'FORWARD' ? 1 : -1;
+          const nx = robot.x + DX[robot.dir] * stepSign;
+          const ny = robot.y + DY[robot.dir] * stepSign;
+
+          // STRICT COLLISION GUARD: Robot NEVER enters a blocked cell
+          if (isCellBlocked(nx, ny)) {
+            robot.bumperTriggered = true;
+            robot.collisions++;
+            robot.bumpOffsetX = DX[robot.dir] * stepSign * 0.24;
+            robot.bumpOffsetY = DY[robot.dir] * stepSign * 0.24;
+            updateTelemetryUI();
+
+            // Check if program contains a Bumper recovery branch (IF_BUMPER)
+            const hasBumperLogic = programBlocks.some(blk => blk.type === 'IF_BUMPER');
+            if (hasBumperLogic && equippedHardware.has('bumper')) {
+              execLogEl.textContent = `Step ${exec.steps}: Bumper hit barrier at (${nx},${ny})! Triggering Bumper Sensor.`;
+              exec.pc++;
+              break;
+            } else {
+              exec.status = 'ERROR';
+              stopExecution();
+              recordLevelAttempt('Attempted', 0);
+              showToast(`💥 Wall / Barrier Collision at (${nx},${ny})! Movement blocked.`, 'error');
+              execLogEl.textContent = `COLLISION BLOCKED at (${nx},${ny})! Use sensors or servos before driving.`;
+              return;
+            }
+          }
+
+          // Clear bump state on valid movement
+          robot.bumperTriggered = false;
+          robot.x = nx;
+          robot.y = ny;
+          execLogEl.textContent = `Step ${exec.steps}: Drove ${b.dir} to (${robot.x},${robot.y}).`;
+          exec.pc++;
+          break;
+        }
+
+        case 'TURN': {
+          robot.bumperTriggered = false;
+          if (b.dir === 'LEFT') {
+            robot.dir = (robot.dir + 3) % 4;
+          } else {
+            robot.dir = (robot.dir + 1) % 4;
+          }
+          execLogEl.textContent = `Step ${exec.steps}: Turned ${b.dir} -> Facing ${DIR_NAMES[robot.dir]}.`;
+          exec.pc++;
+          break;
+        }
+
+        case 'SET_LED': {
+          robot.led = b.color;
+          execLogEl.textContent = `Step ${exec.steps}: High-Beam LED set to ${b.color}.`;
+          evaluateOpticalBeacon();
+          exec.pc++;
+          break;
+        }
+
+        case 'BEEP_BUZZER': {
+          robot.buzzerFlash = 16;
+          execLogEl.textContent = `Step ${exec.steps}: Piezo Buzzer beeped (2.4 kHz)!`;
+          evaluateOpticalBeacon();
+          exec.pc++;
+          break;
+        }
+
+        case 'SET_MAGNET': {
+          robot.magnetOn = (b.state === 'ON');
+          if (robot.magnetOn) {
+            const p = simEntities.payloads.find(item => !item.delivered && item.x === robot.x && item.y === robot.y);
+            if (p) {
+              p.carried = true;
+              robot.carryingPayload = true;
+              execLogEl.textContent = `Step ${exec.steps}: Electromagnet ON — Steel cargo lifted!`;
+            } else {
+              execLogEl.textContent = `Step ${exec.steps}: Electromagnet energized (no crate here).`;
+            }
+          } else {
+            if (robot.carryingPayload) {
+              const p = simEntities.payloads.find(item => item.carried);
+              if (p) {
+                p.carried = false;
+                p.x = robot.x;
+                p.y = robot.y;
+                robot.carryingPayload = false;
+                const dz = simEntities.dropZones.find(z => z.x === robot.x && z.y === robot.y);
+                if (dz) {
+                  p.delivered = true;
+                  dz.unlocked = true;
+                  execLogEl.textContent = `Step ${exec.steps}: Cargo delivered to Drop Zone! Interlock Gate unlocked!`;
+                } else {
+                  execLogEl.textContent = `Step ${exec.steps}: Cargo released at (${robot.x},${robot.y}).`;
+                }
+              }
+            } else {
+              execLogEl.textContent = `Step ${exec.steps}: Electromagnet OFF.`;
+            }
+          }
+          exec.pc++;
+          break;
+        }
+
+        case 'SERVO_180': {
+          const prev = robot.servo180;
+          robot.servo180 = b.angle;
+          execLogEl.textContent = `Step ${exec.steps}: 180° Positional Servo rotated to ${b.angle}°.`;
+
+          const fx = robot.x + DX[robot.dir];
+          const fy = robot.y + DY[robot.dir];
+          simEntities.gates180.forEach(g => {
+            if (Math.abs(g.x - robot.x) + Math.abs(g.y - robot.y) <= 1 && g.reqAngle === b.angle) {
+              g.open = true;
+              execLogEl.textContent += ' [180° Gate Unlocked!]';
+            }
+          });
+
+          simEntities.debris.forEach(deb => {
+            if (!deb.cleared && deb.x === fx && deb.y === fy && Math.abs(b.angle - prev) >= 90) {
+              deb.cleared = true;
+              execLogEl.textContent += ' [Debris Swept!]';
+            }
+          });
+
+          exec.pc++;
+          break;
+        }
+
+        case 'SERVO_360': {
+          robot.servo360Mode = b.mode;
+          if (b.mode === 'CW' || b.mode === 'CCW') {
+            const fx = robot.x + DX[robot.dir];
+            const fy = robot.y + DY[robot.dir];
+
+            // 1) Sweep debris directly ahead
+            simEntities.debris.forEach(deb => {
+              if (!deb.cleared && deb.x === fx && deb.y === fy) {
+                deb.cleared = true;
+                execLogEl.textContent = `Step ${exec.steps}: 360° Servo ${b.mode} swept debris clear!`;
+              }
+            });
+
+            // 2) Wind 360° rotary winch doors within 2 cells
+            simEntities.doors360.forEach(d => {
+              const distCells = Math.abs(d.x - robot.x) + Math.abs(d.y - robot.y);
+              if (distCells <= 2 && b.mode === 'CW') {
+                d.spins++;
+                if (d.spins >= d.reqSpins) {
+                  d.open = true;
+                  execLogEl.textContent = `Step ${exec.steps}: 360° Servo CW (${d.spins}/${d.reqSpins}) -> Winch Door OPEN!`;
+                } else {
+                  execLogEl.textContent = `Step ${exec.steps}: 360° Servo winding winch (${d.spins}/${d.reqSpins})...`;
+                }
+              }
+            });
+          } else {
+            execLogEl.textContent = `Step ${exec.steps}: 360° Continuous Servo STOPPED.`;
+          }
+          exec.pc++;
+          break;
+        }
+
+        default:
+          exec.pc++;
+      }
+
+      updateTelemetryUI();
+
+      if (checkGoal()) {
+        completeLevel();
+      }
+    }
+
+    function evaluateOpticalBeacon() {
+      if (robot.led !== 'OFF' || robot.buzzerFlash > 0) {
+        simEntities.beacons.forEach(b => {
+          if (Math.abs(b.x - robot.x) + Math.abs(b.y - robot.y) <= 4) {
+            b.active = true;
+          }
+        });
+      }
+    }
+
+    function completeLevel() {
+      exec.status = 'SUCCESS';
+      stopExecution();
+      const lvl = levels[currentLvlIdx];
+      const par = lvl.parBlocks || 8;
+      let stars = 1;
+      if (programBlocks.length <= par + 1 && robot.collisions === 0) stars = 3;
+      else if (programBlocks.length <= par + 4 && robot.collisions <= 1) stars = 2;
+
+      const starText = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+      starRatingEl.textContent = `Efficiency: ${starText}`;
+      recordLevelAttempt('Passed', stars);
+      renderLevelTabs();
+      showToast(`🎉 Level Complete in ${exec.steps} steps! Rating: ${starText}`, 'success');
+      execLogEl.textContent = `MISSION COMPLETE! (${programBlocks.length} blocks, ${robot.collisions} bumps, ${starText})`;
+    }
+
+    function recordLevelAttempt(status, stars) {
+      const lvl = levels[currentLvlIdx];
+      const prev = assessmentRecords[lvl.id];
+      // Preserve Passed status if previously passed
+      const finalStatus = (prev && prev.status === 'Passed') ? 'Passed' : status;
+      const finalStars = Math.max(stars, prev ? prev.stars : 0);
+
+      assessmentRecords[lvl.id] = {
+        levelId: lvl.id,
+        levelTitle: lvl.title,
+        grade: lvl.grade,
+        status: finalStatus,
+        blocksUsed: programBlocks.length,
+        parBlocks: lvl.parBlocks || 8,
+        steps: exec.steps,
+        collisions: robot.collisions,
+        stars: finalStars,
+        hardware: Array.from(equippedHardware),
+        program: JSON.parse(JSON.stringify(programBlocks)),
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    // =========================================================================
+    // 10. CANVAS RENDERING ENGINE
+    // =========================================================================
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawFrame() {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const cellW = w / COLS;
+      const cellH = h / ROWS;
+      const lvl = levels[currentLvlIdx];
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+
+      // Decay bump bounce offset smoothly
+      robot.bumpOffsetX *= 0.78;
+      robot.bumpOffsetY *= 0.78;
+
+      // 1. Grid Background & Lines
+      ctx.fillStyle = isLight ? '#e2e8f0' : '#0b1120';
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = isLight ? 'rgba(15,23,42,0.12)' : 'rgba(148,163,184,0.14)';
+      ctx.lineWidth = 1;
+      for (let c = 0; c <= COLS; c++) {
+        ctx.beginPath();
+        ctx.moveTo(c * cellW, 0);
+        ctx.lineTo(c * cellW, h);
+        ctx.stroke();
+      }
+      for (let r = 0; r <= ROWS; r++) {
+        ctx.beginPath();
+        ctx.moveTo(0, r * cellH);
+        ctx.lineTo(w, r * cellH);
+        ctx.stroke();
+      }
+
+      // 2. Colored Floor Tiles
+      const floorPalette = {
+        BLACK: '#1e293b',
+        RED: 'rgba(239, 68, 68, 0.35)',
+        BLUE: 'rgba(59, 130, 246, 0.35)',
+        YELLOW: 'rgba(234, 179, 8, 0.35)',
+        GREEN: 'rgba(16, 185, 129, 0.35)'
+      };
+      (lvl.floors || []).forEach(f => {
+        ctx.fillStyle = floorPalette[f.color] || '#334155';
+        ctx.fillRect(f.x * cellW + 2, f.y * cellH + 2, cellW - 4, cellH - 4);
+        ctx.fillStyle = f.color === 'BLACK' ? '#94a3b8' : (isLight ? '#0f172a' : '#e2e8f0');
+        ctx.font = `bold ${Math.max(8, cellW * 0.13)}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillText(f.color, (f.x + 0.5) * cellW, (f.y + 0.85) * cellH);
+      });
+
+      // 3. Dark Zones (LDR Low-Light Regions)
+      (lvl.darkZones || []).forEach(dz => {
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.76)';
+        ctx.fillRect(dz.x * cellW + 1, dz.y * cellH + 1, cellW - 2, cellH - 2);
+        ctx.strokeStyle = '#6366f1';
+        ctx.setLineDash([4, 4]);
+        ctx.strokeRect(dz.x * cellW + 3, dz.y * cellH + 3, cellW - 6, cellH - 6);
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#a5b4fc';
+        ctx.font = `bold ${Math.max(8, cellW * 0.12)}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillText('DARK 15%', (dz.x + 0.5) * cellW, (dz.y + 0.24) * cellH);
+      });
+
+      // 4. Solid Walls (#) with Hatching
+      (lvl.walls || []).forEach(wall => {
+        const px = wall.x * cellW;
+        const py = wall.y * cellH;
+        ctx.fillStyle = isLight ? '#475569' : '#1e293b';
+        ctx.fillRect(px, py, cellW, cellH);
+        ctx.strokeStyle = isLight ? '#334155' : '#334155';
+        ctx.strokeRect(px + 0.5, py + 0.5, cellW - 1, cellH - 1);
+      });
+
+      // 5. Goal Pad
+      const gx = (lvl.goal.x + 0.5) * cellW;
+      const gy = (lvl.goal.y + 0.5) * cellH;
+      const gr = Math.min(cellW, cellH) * 0.36;
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.25)';
+      ctx.beginPath();
+      ctx.arc(gx, gy, gr * 1.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(gx, gy, gr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#022c22';
+      ctx.font = `bold ${Math.max(9, cellW * 0.15)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('GOAL', gx, gy);
+
+      // 6. 180° Positional Servo Gates
+      simEntities.gates180.forEach(g => {
+        const px = g.x * cellW;
+        const py = g.y * cellH;
+        if (g.open) {
+          ctx.strokeStyle = '#10b981';
+          ctx.setLineDash([5, 5]);
+          ctx.strokeRect(px + 6, py + 6, cellW - 12, cellH - 12);
+          ctx.setLineDash([]);
+        } else {
+          ctx.fillStyle = '#ea580c';
+          ctx.fillRect(px + cellW * 0.3, py + 4, cellW * 0.4, cellH - 8);
+          ctx.fillStyle = '#fff';
+          ctx.font = `bold ${Math.max(8, cellW * 0.13)}px monospace`;
+          ctx.textAlign = 'center';
+          ctx.fillText(`${g.reqAngle}°`, px + cellW * 0.5, py + cellH * 0.5);
+        }
+      });
+
+      // 7. 360° Continuous Servo Winch Doors
+      simEntities.doors360.forEach(d => {
+        const px = d.x * cellW;
+        const py = d.y * cellH;
+        if (d.open) {
+          ctx.strokeStyle = '#10b981';
+          ctx.setLineDash([5, 5]);
+          ctx.strokeRect(px + 6, py + 6, cellW - 12, cellH - 12);
+          ctx.setLineDash([]);
+        } else {
+          ctx.fillStyle = '#d97706';
+          ctx.fillRect(px + 8, py + 8, cellW - 16, cellH - 16);
+          ctx.fillStyle = '#fff';
+          ctx.font = `bold ${Math.max(8, cellW * 0.12)}px monospace`;
+          ctx.textAlign = 'center';
+          ctx.fillText(`360°:${d.spins}/${d.reqSpins}`, px + cellW * 0.5, py + cellH * 0.5);
+        }
+      });
+
+      // 8. Optical LED Beacons
+      simEntities.beacons.forEach(b => {
+        const px = b.x * cellW;
+        const py = b.y * cellH;
+        if (b.active) {
+          ctx.strokeStyle = '#10b981';
+          ctx.setLineDash([4, 4]);
+          ctx.strokeRect(px + 6, py + 6, cellW - 12, cellH - 12);
+          ctx.setLineDash([]);
+        } else {
+          ctx.fillStyle = 'rgba(239, 68, 68, 0.3)';
+          ctx.fillRect(px + 6, py + 6, cellW - 12, cellH - 12);
+          ctx.fillStyle = '#fca5a5';
+          ctx.font = `bold ${Math.max(8, cellW * 0.12)}px monospace`;
+          ctx.textAlign = 'center';
+          ctx.fillText('LED GATE', px + cellW * 0.5, py + cellH * 0.5);
+        }
+      });
+
+      // 9. Cargo Interlock Gates
+      simEntities.dropZones.forEach(dz => {
+        if (dz.gateX !== undefined && !dz.unlocked) {
+          const px = dz.gateX * cellW;
+          const py = dz.gateY * cellH;
+          ctx.fillStyle = '#2563eb';
+          ctx.fillRect(px + 8, py + 8, cellW - 16, cellH - 16);
+          ctx.fillStyle = '#fff';
+          ctx.font = `bold ${Math.max(8, cellW * 0.12)}px monospace`;
+          ctx.textAlign = 'center';
+          ctx.fillText('CARGO LOCK', px + cellW * 0.5, py + cellH * 0.5);
+        }
+      });
+
+      // 10. Debris Crates
+      simEntities.debris.forEach(deb => {
+        if (!deb.cleared) {
+          const px = deb.x * cellW;
+          const py = deb.y * cellH;
+          ctx.fillStyle = '#b45309';
+          ctx.fillRect(px + 10, py + 10, cellW - 20, cellH - 20);
+          ctx.strokeStyle = '#fde68a';
+          ctx.strokeRect(px + 10, py + 10, cellW - 20, cellH - 20);
+          ctx.fillStyle = '#fef3c7';
+          ctx.font = `bold ${Math.max(8, cellW * 0.11)}px monospace`;
+          ctx.textAlign = 'center';
+          ctx.fillText('DEBRIS', px + cellW * 0.5, py + cellH * 0.5);
+        }
+      });
+
+      // 11. Metallic Payloads
+      simEntities.payloads.forEach(p => {
+        const cx = (p.carried ? robot.x + 0.5 : p.x + 0.5) * cellW;
+        const cy = (p.carried ? robot.y + 0.5 : p.y + 0.5) * cellH;
+        ctx.fillStyle = p.delivered ? '#10b981' : '#94a3b8';
+        ctx.strokeStyle = '#f8fafc';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, Math.min(cellW, cellH) * 0.18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+
+      // 12. Draw Shape-Robot
+      drawRobot(cellW, cellH);
+
+      requestAnimationFrame(drawFrame);
+    }
+
+    function drawRobot(cellW, cellH) {
+      const cx = (robot.x + 0.5 + robot.bumpOffsetX) * cellW;
+      const cy = (robot.y + 0.5 + robot.bumpOffsetY) * cellH;
+      const r = Math.min(cellW, cellH) * 0.34;
+      const rot = (robot.dir * Math.PI) / 2;
+
+      if (robot.servo360Mode === 'CW') robot.servo360Angle = (robot.servo360Angle + 6) % 360;
+      if (robot.servo360Mode === 'CCW') robot.servo360Angle = (robot.servo360Angle - 6) % 360;
+      if (robot.buzzerFlash > 0) robot.buzzerFlash--;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+
+      // Ultrasonic Cone
+      if (equippedHardware.has('ultrasonic')) {
+        const distCells = Math.min(readUltrasonicCm() / 20, 3.2);
+        ctx.fillStyle = 'rgba(45, 212, 191, 0.22)';
+        ctx.beginPath();
+        ctx.moveTo(r * 0.7, 0);
+        ctx.arc(r * 0.7, 0, distCells * cellW * 0.62, -0.26, 0.26);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // DC Motor Wheels
+      if (equippedHardware.has('dc_motors')) {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-r * 0.65, -r - 4, r * 1.3, 5);
+        ctx.fillRect(-r * 0.65, r - 1, r * 1.3, 5);
+      }
+
+      // Directional Octagon Chassis
+      ctx.fillStyle = '#3b82f6';
+      ctx.strokeStyle = '#bfdbfe';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(r + 4, 0);
+      ctx.lineTo(r * 0.35, -r * 0.85);
+      ctx.lineTo(-r * 0.8, -r * 0.65);
+      ctx.lineTo(-r * 0.8, r * 0.65);
+      ctx.lineTo(r * 0.35, r * 0.85);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Touch Bumper Bar
+      if (equippedHardware.has('bumper')) {
+        ctx.strokeStyle = readBumperPressed() ? '#ef4444' : '#f8fafc';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(r + 6, -r * 0.55);
+        ctx.lineTo(r + 6, r * 0.55);
+        ctx.stroke();
+      }
+
+      // 180° Positional Servo Arm
+      if (equippedHardware.has('servo180')) {
+        ctx.save();
+        const sRad = ((-90 + robot.servo180) * Math.PI) / 180;
+        ctx.rotate(sRad);
+        ctx.fillStyle = '#f97316';
+        ctx.fillRect(0, -3, r * 1.35, 6);
+        ctx.restore();
+      }
+
+      // 360° Continuous Servo Rotor
+      if (equippedHardware.has('servo360')) {
+        ctx.save();
+        ctx.translate(-r * 0.3, 0);
+        ctx.rotate((robot.servo360Angle * Math.PI) / 180);
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.36, 0, Math.PI * 2);
+        ctx.moveTo(-r * 0.36, 0);
+        ctx.lineTo(r * 0.36, 0);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // High-Beam LED & Buzzer Ring
+      if (equippedHardware.has('led_buzzer')) {
+        const ledColors = { OFF: '#334155', GREEN: '#10b981', RED: '#ef4444', BLUE: '#38bdf8' };
+        ctx.fillStyle = ledColors[robot.led] || '#334155';
+        ctx.beginPath();
+        ctx.arc(r * 0.25, 0, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (robot.buzzerFlash > 0) {
+          ctx.strokeStyle = '#facc15';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(0, 0, r + 10, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+
+      ctx.restore();
+    }
+
+    // =========================================================================
+    // 11. STUDENT ASSESSMENT SUBMISSION & TEACHER GRADING SYSTEM
+    // =========================================================================
+    function computeChecksum(str) {
+      let hash = 2166136261;
+      for (let i = 0; i < str.length; i++) {
+        hash ^= str.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(16).toUpperCase().padStart(8, '0');
+    }
+
+    function buildAssessmentPayload() {
+      // Ensure current workspace is captured even if not yet completed
+      const curLvl = levels[currentLvlIdx];
+      if (!assessmentRecords[curLvl.id] && programBlocks.length > 0) {
+        recordLevelAttempt('In Progress', 0);
+      }
+
+      const name = document.getElementById('stuName').value.trim() || 'Anonymous_Student';
+      const stuClass = document.getElementById('stuClass').value.trim() || 'Grade_8_9';
+      const taskCode = document.getElementById('stuTaskCode').value.trim() || 'GENERAL';
+
+      const recordsList = levels.map(lvl => assessmentRecords[lvl.id] || {
+        levelId: lvl.id,
+        levelTitle: lvl.title,
+        grade: lvl.grade,
+        status: 'Not Attempted',
+        blocksUsed: 0,
+        parBlocks: lvl.parBlocks || 8,
+        steps: 0,
+        collisions: 0,
+        stars: 0,
+        hardware: lvl.recommendedHardware || [],
+        program: []
+      });
+
+      const passedCount = recordsList.filter(r => r.status === 'Passed').length;
+      const totalStars = recordsList.reduce((acc, r) => acc + (r.stars || 0), 0);
+
+      const coreData = {
+        format: 'ServoGateSensorSprint_Assessment_v2',
+        submittedAt: new Date().toISOString(),
+        student: { name, classGroup: stuClass, assignmentCode: taskCode },
+        summary: {
+          levelsPassed: `${passedCount} / ${levels.length}`,
+          totalStars: `${totalStars} / ${levels.length * 3}`
+        },
+        levels: recordsList
+      };
+
+      coreData.integrityChecksum = computeChecksum(JSON.stringify(coreData));
+      return coreData;
+    }
+
+    function renderAssessmentTable() {
+      const tbody = document.querySelector('#assessSummaryTable tbody');
+      tbody.innerHTML = '';
+      levels.forEach(lvl => {
+        const rec = assessmentRecords[lvl.id];
+        const status = rec ? rec.status : 'Not Attempted';
+        const blocks = rec ? `${rec.blocksUsed} (${lvl.parBlocks || 8})` : `- (${lvl.parBlocks || 8})`;
+        const steps = rec ? rec.steps : '-';
+        const bumps = rec ? rec.collisions : '-';
+        const stars = rec && rec.stars > 0 ? '★'.repeat(rec.stars) + '☆'.repeat(3 - rec.stars) : '☆☆☆';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${lvl.short}</strong></td>
+          <td style="color:${status === 'Passed' ? '#10b981' : 'var(--text-secondary)'}; font-weight:700;">${status}</td>
+          <td class="mono">${blocks}</td>
+          <td class="mono">${steps}</td>
+          <td class="mono">${bumps}</td>
+          <td style="color:#fbbf24;">${stars}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function inspectStudentSubmission(rawText) {
+      const out = document.getElementById('gradeReportOutput');
+      try {
+        const data = JSON.parse(rawText);
+        if (!data.student || !Array.isArray(data.levels)) {
+          throw new Error('Missing student or levels array.');
+        }
+        const providedChecksum = data.integrityChecksum;
+        const copyForCheck = { ...data };
+        delete copyForCheck.integrityChecksum;
+        const expectedChecksum = computeChecksum(JSON.stringify(copyForCheck));
+        const validHash = providedChecksum === expectedChecksum;
+
+        let html = `
+          <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+            <div>
+              <strong>Student:</strong> ${data.student.name} (${data.student.classGroup}) |
+              <strong>Task:</strong> ${data.student.assignmentCode}
+            </div>
+            <span class="badge ${validHash ? 'badge-unlocked' : 'badge-locked'}">
+              ${validHash ? '✔ Checksum Verified (' + providedChecksum + ')' : '⚠️ Checksum Mismatch (Edited)'}
+            </span>
+          </div>
+          <div style="font-size:0.78rem; margin-bottom:8px;">
+            <strong>Score Summary:</strong> Passed ${data.summary.levelsPassed} | Stars: ${data.summary.totalStars}
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">
+        `;
+
+        data.levels.forEach((rec, idx) => {
+          if (rec.program && rec.program.length > 0) {
+            html += `<button class="btn-blue replay-stu-btn" data-lidx="${idx}">▶ Replay ${rec.levelTitle.split(':')[0]} (${rec.status})</button>`;
+          }
+        });
+        html += `</div>`;
+
+        out.innerHTML = html;
+        out.classList.remove('hidden');
+
+        out.querySelectorAll('.replay-stu-btn').forEach(btn => {
+          btn.addEventListener('click', e => {
+            const lidx = Number(e.currentTarget.dataset.lidx);
+            const rec = data.levels[lidx];
+            document.getElementById('assessmentModal').classList.add('hidden');
+            loadLevel(lidx, true);
+            if (rec.hardware && rec.hardware.length > 0) {
+              equippedHardware = new Set(rec.hardware);
+              renderChassisBuilder();
+            }
+            programBlocks = JSON.parse(JSON.stringify(rec.program));
+            renderWorkspace();
+            showToast(`👨‍🏫 Loaded ${data.student.name}'s code for ${rec.levelTitle}. Click Run!`, 'info');
+          });
+        });
+      } catch (err) {
+        out.innerHTML = `<span style="color:#f87171;">⚠️ Invalid Assessment JSON: ${err.message}</span>`;
+        out.classList.remove('hidden');
+      }
+    }
+
+    // =========================================================================
+    // 12. TEACHER LEVEL EDITOR & JSON TOOLS
+    // =========================================================================
+    const EDITOR_BRUSHES = [
+      { id: 'START', label: '🤖 Start' },
+      { id: 'GOAL', label: '🏁 Goal' },
+      { id: 'WALL', label: '🧱 Wall' },
+      { id: 'FLOOR_BLACK', label: '⬛ Black Line' },
+      { id: 'FLOOR_RED', label: '🟥 Red Pad' },
+      { id: 'FLOOR_BLUE', label: '🟦 Blue Pad' },
+      { id: 'FLOOR_YELLOW', label: '🟨 Yellow Pad' },
+      { id: 'DARK_ZONE', label: '🌑 Dark Zone' },
+      { id: 'GATE_180', label: '🦾 180° Gate' },
+      { id: 'DOOR_360', label: '🔄 360° Door' },
+      { id: 'BEACON', label: '💡 LED Gate' },
+      { id: 'PAYLOAD', label: '🧲 Steel Crate' },
+      { id: 'DEBRIS', label: '📦 Debris' },
+      { id: 'ERASE', label: '🧹 Erase' }
+    ];
+
+    function renderEditorTools() {
+      const container = document.getElementById('editorTools');
+      container.innerHTML = '';
+      EDITOR_BRUSHES.forEach(b => {
+        const btn = document.createElement('button');
+        btn.className = `tool-btn ${selectedBrush === b.id ? 'selected-tool' : ''}`;
+        btn.textContent = b.label;
+        btn.addEventListener('click', () => {
+          selectedBrush = b.id;
+          renderEditorTools();
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    canvas.addEventListener('click', e => {
+      if (!editorMode) return;
+      const rect = canvas.getBoundingClientRect();
+      const gx = Math.floor(((e.clientX - rect.left) / rect.width) * COLS);
+      const gy = Math.floor(((e.clientY - rect.top) / rect.height) * ROWS);
+      if (gx < 0 || gx >= COLS || gy < 0 || gy >= ROWS) return;
+
+      const lvl = levels[currentLvlIdx];
+      lvl.walls = (lvl.walls || []).filter(w => !(w.x === gx && w.y === gy));
+      lvl.floors = (lvl.floors || []).filter(f => !(f.x === gx && f.y === gy));
+      lvl.darkZones = (lvl.darkZones || []).filter(d => !(d.x === gx && d.y === gy));
+      lvl.gates180 = (lvl.gates180 || []).filter(g => !(g.x === gx && g.y === gy));
+      lvl.doors360 = (lvl.doors360 || []).filter(d => !(d.x === gx && d.y === gy));
+      lvl.beacons = (lvl.beacons || []).filter(b => !(b.x === gx && b.y === gy));
+      lvl.payloads = (lvl.payloads || []).filter(p => !(p.x === gx && p.y === gy));
+      lvl.dropZones = (lvl.dropZones || []).filter(dz => !(dz.x === gx && dz.y === gy));
+      lvl.debris = (lvl.debris || []).filter(deb => !(deb.x === gx && deb.y === gy));
+
+      switch (selectedBrush) {
+        case 'START':
+          if (lvl.start.x === gx && lvl.start.y === gy) {
+            lvl.start.dir = (lvl.start.dir + 1) % 4;
+          } else {
+            lvl.start = { x: gx, y: gy, dir: 0 };
+          }
+          break;
+        case 'GOAL': lvl.goal = { x: gx, y: gy }; break;
+        case 'WALL': lvl.walls.push({ x: gx, y: gy }); break;
+        case 'FLOOR_BLACK': lvl.floors.push({ x: gx, y: gy, color: 'BLACK' }); break;
+        case 'FLOOR_RED': lvl.floors.push({ x: gx, y: gy, color: 'RED' }); break;
+        case 'FLOOR_BLUE':
+          lvl.floors.push({ x: gx, y: gy, color: 'BLUE' });
+          lvl.dropZones.push({ x: gx, y: gy });
+          break;
+        case 'FLOOR_YELLOW': lvl.floors.push({ x: gx, y: gy, color: 'YELLOW' }); break;
+        case 'DARK_ZONE': lvl.darkZones.push({ x: gx, y: gy }); break;
+        case 'GATE_180': lvl.gates180.push({ x: gx, y: gy, reqAngle: 90 }); break;
+        case 'DOOR_360': lvl.doors360.push({ x: gx, y: gy, reqSpins: 2 }); break;
+        case 'BEACON': lvl.beacons.push({ x: gx, y: gy }); break;
+        case 'PAYLOAD': lvl.payloads.push({ x: gx, y: gy }); break;
+        case 'DEBRIS': lvl.debris.push({ x: gx, y: gy }); break;
+        case 'ERASE': break;
+      }
+      resetArena();
+    });
+
+    // =========================================================================
+    // 13. HARDWARE WIKIPEDIA MODAL & EVENT LISTENERS
+    // =========================================================================
+    function renderWikiModal() {
+      const body = document.getElementById('wikiModalBody');
+      body.innerHTML = '';
+      HARDWARE_CATALOG.forEach(hw => {
+        const card = document.createElement('div');
+        card.className = 'wiki-card';
+        card.innerHTML = `
+          <div class="wiki-card-top">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="mono badge">${hw.port}</span>
+              <strong>${hw.name}</strong>
+              <span class="hw-tag ${hw.tagClass}">${hw.category}</span>
+            </div>
+            <a href="${hw.wikiUrl}" target="_blank" rel="noopener noreferrer" class="wiki-link">
+              🔗 ${hw.wikiLabel} ↗
+            </a>
+          </div>
+          <p style="font-size:0.79rem; color:var(--text-secondary);">${hw.desc}</p>
+        `;
+        body.appendChild(card);
+      });
+    }
+
+    // Persisted Theme Toggle
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      try { localStorage.setItem('sgs_theme', theme); } catch (_) {}
+      document.getElementById('btnThemeToggle').textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+    }
+
+    document.getElementById('btnThemeToggle').addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    document.getElementById('btnHintToggle').addEventListener('click', () => {
+      lvlHintBoxEl.classList.toggle('hidden');
+    });
+
+    document.getElementById('btnAutoEquip').addEventListener('click', () => {
+      const lvl = levels[currentLvlIdx];
+      equippedHardware = new Set(lvl.recommendedHardware || ['ultrasonic', 'bumper', 'dc_motors']);
+      renderChassisBuilder();
+      showToast('⚡ Recommended hardware loadout equipped!', 'info');
+    });
+
+    // Execution Controls
+    document.getElementById('btnRun').addEventListener('click', () => {
+      if (exec.running) stopExecution();
+      else startExecution();
+    });
+
+    document.getElementById('speedSelect').addEventListener('change', () => {
+      if (exec.running) {
+        stopExecution();
+        startExecution();
+      }
+    });
+
+    document.getElementById('btnStep').addEventListener('click', () => {
+      if (exec.running) stopExecution();
+      if (exec.status === 'SUCCESS' || exec.status === 'ERROR') resetArena();
+      executeStep();
+    });
+
+    document.getElementById('btnReset').addEventListener('click', resetArena);
+
+    document.getElementById('btnLoadSolution').addEventListener('click', () => {
+      resetArena();
+      const lvl = levels[currentLvlIdx];
+      equippedHardware = new Set(lvl.recommendedHardware || []);
+      renderChassisBuilder();
+      programBlocks = JSON.parse(JSON.stringify(lvl.solution || []));
+      renderWorkspace();
+      showToast('✨ Reference Solution loaded! Click "▶ Run Code" to watch it pass.', 'info');
+    });
+
+    document.getElementById('btnClearBlocks').addEventListener('click', () => {
+      stopExecution();
+      programBlocks = [];
+      exec.activeIdx = -1;
+      renderWorkspace();
+    });
+
+    // Assessment Modal Events
+    document.getElementById('btnAssessment').addEventListener('click', () => {
+      renderAssessmentTable();
+      document.getElementById('assessmentModal').classList.remove('hidden');
+    });
+
+    document.getElementById('btnCloseAssessment').addEventListener('click', () => {
+      document.getElementById('assessmentModal').classList.add('hidden');
+    });
+
+    document.getElementById('tabStudentSubmit').addEventListener('click', () => {
+      document.getElementById('tabStudentSubmit').classList.add('tab-active');
+      document.getElementById('tabTeacherGrade').classList.remove('tab-active');
+      document.getElementById('studentSubmitView').classList.remove('hidden');
+      document.getElementById('teacherGradeView').classList.add('hidden');
+      renderAssessmentTable();
+    });
+
+    document.getElementById('tabTeacherGrade').addEventListener('click', () => {
+      document.getElementById('tabTeacherGrade').classList.add('tab-active');
+      document.getElementById('tabStudentSubmit').classList.remove('tab-active');
+      document.getElementById('teacherGradeView').classList.remove('hidden');
+      document.getElementById('studentSubmitView').classList.add('hidden');
+    });
+
+    document.getElementById('btnCopyAssessment').addEventListener('click', () => {
+      const payload = JSON.stringify(buildAssessmentPayload(), null, 2);
+      const ta = document.createElement('textarea');
+      ta.value = payload;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('📋 Assessment JSON copied! Paste into Google Forms / Teams / Moodle.', 'success');
+    });
+
+    document.getElementById('btnDownloadAssessment').addEventListener('click', () => {
+      const data = buildAssessmentPayload();
+      const safeName = data.student.name.replace(/[^a-z0-9_-]/gi, '_');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `student_assessment_${safeName}_${dateStr}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('💾 Offline assessment .json file downloaded!', 'success');
+    });
+
+    document.getElementById('gradeFileInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        document.getElementById('gradeJsonInput').value = ev.target.result;
+        inspectStudentSubmission(ev.target.result);
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById('btnParseGradeJson').addEventListener('click', () => {
+      inspectStudentSubmission(document.getElementById('gradeJsonInput').value);
+    });
+
+    // Teacher Level Editor Events
+    document.getElementById('btnToggleEditor').addEventListener('click', () => {
+      editorMode = !editorMode;
+      document.getElementById('teacherEditorCard').classList.toggle('hidden', !editorMode);
+      document.getElementById('btnToggleEditor').classList.toggle('tab-active', editorMode);
+      if (editorMode) {
+        showToast('🛠️ Editor Mode ON: Click any grid cell on the arena canvas to paint!', 'info');
+      } else {
+        hideToast();
+      }
+    });
+
+    ['edTitle', 'edGrade', 'edHwMode', 'edPar', 'edDesc'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        const lvl = levels[currentLvlIdx];
+        lvl.title = document.getElementById('edTitle').value;
+        lvl.grade = document.getElementById('edGrade').value;
+        lvl.hwMode = document.getElementById('edHwMode').value;
+        lvl.parBlocks = Number(document.getElementById('edPar').value) || 8;
+        lvl.desc = document.getElementById('edDesc').value;
+        lvl.recommendedHardware = Array.from(equippedHardware);
+
+        lvlTitleEl.textContent = lvl.title;
+        lvlGradeBadgeEl.textContent = lvl.grade;
+        lvlParBadgeEl.textContent = `Par: ${lvl.parBlocks} blocks`;
+        lvlDescEl.textContent = lvl.desc;
+        renderChassisBuilder();
+      });
+    });
+
+    document.getElementById('btnAddNewLevel').addEventListener('click', () => {
+      const newNum = levels.length + 1;
+      levels.push({
+        id: `custom_${Date.now()}`,
+        short: `${newNum}. Custom`,
+        title: `Level ${newNum}: Custom Teacher Challenge`,
+        grade: 'Grade 8',
+        parBlocks: 8,
+        hwMode: 'adjustable',
+        desc: 'Navigate to the green goal pad using your sensors and servos.',
+        hint: 'Build a Repeat Until Goal loop with sensor checks.',
+        recommendedHardware: ['ultrasonic', 'bumper', 'dc_motors'],
+        start: { x: 1, y: 4, dir: 0 },
+        goal: { x: 11, y: 4 },
+        walls: borderWalls(),
+        floors: [], darkZones: [], gates180: [], doors360: [], beacons: [], payloads: [], dropZones: [], debris: [],
+        solution: [
+          { type: 'REPEAT_GOAL' },
+          { type: 'DRIVE', dir: 'FORWARD' },
+          { type: 'END_REPEAT' }
+        ]
+      });
+      loadLevel(levels.length - 1, false);
+      showToast(`✔ Created Level ${newNum}! Paint walls and entities on the grid.`, 'success');
+    });
+
+    document.getElementById('btnClearEditor').addEventListener('click', () => {
+      const lvl = levels[currentLvlIdx];
+      lvl.walls = borderWalls();
+      lvl.floors = [];
+      lvl.darkZones = [];
+      lvl.gates180 = [];
+      lvl.doors360 = [];
+      lvl.beacons = [];
+      lvl.payloads = [];
+      lvl.dropZones = [];
+      lvl.debris = [];
+      resetArena();
+    });
+
+    document.getElementById('btnExportJson').addEventListener('click', () => {
+      const lvl = levels[currentLvlIdx];
+      lvl.recommendedHardware = Array.from(equippedHardware);
+      lvl.solution = JSON.parse(JSON.stringify(programBlocks));
+      document.getElementById('jsonModalTitle').textContent = 'Export Custom Level JSON';
+      document.getElementById('jsonTextarea').value = JSON.stringify(lvl, null, 2);
+      document.getElementById('jsonModal').classList.remove('hidden');
+    });
+
+    document.getElementById('btnImportJson').addEventListener('click', () => {
+      document.getElementById('jsonModalTitle').textContent = 'Import Custom Level JSON';
+      document.getElementById('jsonTextarea').value = '';
+      document.getElementById('jsonModal').classList.remove('hidden');
+    });
+
+    document.getElementById('btnCloseJson').addEventListener('click', () => {
+      document.getElementById('jsonModal').classList.add('hidden');
+    });
+
+    document.getElementById('btnCopyJson').addEventListener('click', () => {
+      const ta = document.getElementById('jsonTextarea');
+      ta.select();
+      document.execCommand('copy');
+      showToast('📋 Level JSON copied to clipboard!', 'info');
+    });
+
+    document.getElementById('btnApplyJson').addEventListener('click', () => {
+      try {
+        const parsed = JSON.parse(document.getElementById('jsonTextarea').value);
+        if (!parsed.start || !parsed.goal || !Array.isArray(parsed.walls)) {
+          throw new Error('Invalid level structure.');
+        }
+        parsed.short = parsed.short || `${levels.length + 1}. Custom`;
+        levels.push(parsed);
+        document.getElementById('jsonModal').classList.add('hidden');
+        loadLevel(levels.length - 1, false);
+        showToast('✔ Custom level imported successfully!', 'success');
+      } catch (err) {
+        showToast('⚠️ Invalid JSON format: ' + err.message, 'error');
+      }
+    });
+
+    document.getElementById('btnWikiGuide').addEventListener('click', () => {
+      renderWikiModal();
+      document.getElementById('wikiModal').classList.remove('hidden');
+    });
+
+    document.getElementById('btnCloseWiki').addEventListener('click', () => {
+      document.getElementById('wikiModal').classList.add('hidden');
+    });
+
+    // Startup Initialization
+    window.onload = function () {
+      try {
+        const savedTheme = localStorage.getItem('sgs_theme');
+        if (savedTheme === 'light' || savedTheme === 'dark') applyTheme(savedTheme);
+      } catch (_) {}
+
+      resizeCanvas();
+      renderPalette();
+      renderEditorTools();
+      loadLevel(0, false);
+      drawFrame();
+    };
+  </script>
+</body>
+</html>
