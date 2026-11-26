@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Servo-Gate &amp; Sensor Sprint v4 — Grade 8 &amp; 9 Robotics</title>
+<style>
+:root,[data-theme=dark]{--bg:#090e1a;--s:#111827;--s2:#1e293b;--b:#2b3a55;--t:#f1f5f9;--t2:#94a3b8;--ac:#3b82f6;--ok:#10b981;--bad:#ef4444;--warn:#f59e0b}
+[data-theme=light]{--bg:#f1f5f9;--s:#fff;--s2:#f1f5f9;--b:#cbd5e1;--t:#0f172a;--t2:#475569;--ac:#2563eb;--ok:#059669;--bad:#dc2626;--warn:#d97706}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.4 system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--t)}
+header{background:var(--s);border-bottom:1px solid var(--b);padding:8px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30}
+h1{font-size:1rem}.muted{color:var(--t2);font-size:.78rem}.mono{font-family:ui-monospace,Consolas,monospace}
+button,select,input,textarea{font:inherit;color:var(--t);background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:6px 9px}
+button{cursor:pointer;font-weight:600;font-size:.78rem;min-height:32px}
+button:hover{border-color:var(--ac)}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+.on,.pri{background:var(--ac);border-color:var(--ac);color:#fff}.ok{background:var(--ok);border-color:var(--ok);color:#fff}.am{border-color:var(--warn);color:var(--warn)}
+main{max-width:1600px;margin:0 auto;padding:12px;display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
+@media(max-width:1000px){main{grid-template-columns:1fr}}
+.col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.card{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:10px 12px}
+.ct{font-size:.74rem;font-weight:700;text-transform:uppercase;color:var(--t2);margin-bottom:6px;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;align-items:center}
+.tabs,.bar{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.hud{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:6px}
+.hud div{background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:5px 8px}.hud small{display:block;font-size:.62rem;text-transform:uppercase;color:var(--t2)}
+.cvw{position:relative;border:1px solid var(--b);border-radius:12px;overflow:hidden;aspect-ratio:13/8;background:var(--bg)}
+canvas{width:100%;height:100%;display:block}
+#toast{position:absolute;top:8px;left:50%;transform:translateX(-50%);padding:6px 14px;border-radius:9px;font-weight:700;max-width:92%;text-align:center;font-size:.8rem;color:#fff}
+.t-ok{background:#047857}.t-bad{background:#b91c1c}.t-info{background:#1d4ed8}
+.hid{display:none!important}
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px}
+.pal button,.row{color:#fff;border:1px solid rgba(255,255,255,.25)}
+.c{background:#6b21a8}.g{background:#15803d}.a{background:#1d4ed8}.v{background:#c2410c}.s{background:#0f766e}
+#ws{display:flex;flex-direction:column;gap:5px;min-height:220px;max-height:440px;overflow:auto}
+.row{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:5px 8px;border-radius:8px;font-size:.76rem;font-weight:600;cursor:pointer;flex-wrap:wrap}
+.row select{background:rgba(2,6,23,.75);color:#fff;padding:2px 4px;font-size:.72rem}
+.row.act{outline:3px solid #facc15}.row.sel{box-shadow:0 0 0 2px #fff inset}
+.ra button{background:rgba(0,0,0,.3);color:#fff;border:0;padding:2px 7px;min-height:26px}
+.hwg{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:5px}
+#clk{font-weight:800;padding:4px 10px;border-radius:8px;background:var(--s2)}#clk.urg{background:var(--bad);color:#fff;animation:p 1s infinite}@keyframes p{50%{opacity:.5}}
+.locked .lk{pointer-events:none;opacity:.45}.testing .notest{display:none!important}
+.ov{position:fixed;inset:0;background:rgba(2,6,23,.8);display:flex;align-items:center;justify-content:center;padding:14px;z-index:60}
+.md{background:var(--s);border:1px solid var(--b);border-radius:14px;max-width:900px;width:100%;max-height:90vh;display:flex;flex-direction:column}
+.mh{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--b)}
+.mb{padding:12px 14px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+table{border-collapse:collapse;width:100%;font-size:.76rem}th,td{border:1px solid var(--b);padding:4px 6px;text-align:left}th{background:var(--s2)}
+.fl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px}.fl label{font-size:.7rem;color:var(--t2);font-weight:700}.fl input,.fl select{width:100%}
+textarea{width:100%;min-height:150px}
+</style></head><body>
+<header>
+ <div><h1>🤖 Servo-Gate &amp; Sensor Sprint <span class="muted">v4 · Grade 8 &amp; 9</span></h1><div class="muted">Sense → Decide → Act · loops, conditions &amp; variables</div></div>
+ <div class="bar"><span id="clk" class="mono hid"></span>
+  <button id="bAss" class="ok">📋 Assessment</button><button id="bTest" class="am">⏱ Test Mode</button>
+  <button id="bEd" class="am notest">🛠 Level Builder</button><button id="bWiki">📚 Guide</button><button id="bTh">☀️</button></div>
+</header>
+<main>
+<section class="col">
+ <div class="card lk"><div class="tabs" id="tabs" role="tablist"></div></div>
+ <div class="card"><div class="ct"><span><span class="mono" id="lg"></span> <b id="lt" style="font-size:.95rem;text-transform:none;color:var(--t)"></b></span>
+  <button id="bHint" class="notest">💡 Hint</button></div>
+  <div class="muted" id="lo"></div><p id="ld" style="margin-top:4px"></p><p id="hint" class="hid" style="margin-top:6px;padding:6px 8px;border:1px solid var(--warn);border-radius:8px"></p></div>
+ <div class="hud"><div><small>Ultrasonic</small><span id="hd" class="mono"></span></div><div><small>IR floor</small><span id="hc" class="mono"></span></div><div><small>LDR light</small><span id="hl" class="mono"></span></div><div><small>Bumper</small><span id="hb" class="mono"></span></div><div><small>Counter n</small><span id="hn" class="mono"></span></div><div><small>Pose · Bumps</small><span id="hp" class="mono"></span></div><div><small>Servos</small><span id="hs" class="mono"></span></div></div>
+ <div class="cvw"><canvas id="cv"></canvas><div id="toast" class="hid"></div></div>
+ <div id="ed" class="card hid"><div class="ct"><span>🛠 Level Builder — click the arena to paint</span><span class="bar"><button id="eNew" class="ok">+ New</button><button id="eExp" class="pri">Export level</button><button id="eExpAll">Export pack</button><button id="eImp">Import</button><button id="eClr">Clear</button></span></div>
+  <div class="fl"><div><label>Title</label><input id="eT"></div><div><label>Grade</label><select id="eG"><option>Grade 8</option><option>Grade 9</option></select></div><div><label>Par blocks</label><input id="eP" type="number" min="1" max="60"></div><div><label>Required concept</label><select id="eN"><option value="">None</option><option value="IF">If / Else</option><option value="REP">Repeat N</option><option value="WH">While</option><option value="UG">Until goal</option><option value="SETV">Variable</option></select></div><div><label>Gate angle / door spins</label><span class="bar"><input id="eA" type="number" value="90" style="width:70px"><input id="eS" type="number" value="2" style="width:60px"></span></div><div><label>Hardware</label><label><input type="checkbox" id="eL" style="width:auto"> Lock loadout (uses current)</label></div></div>
+  <div><label class="muted">Mission briefing</label><input id="eD" style="width:100%"></div>
+  <div class="bar" id="brush" style="margin-top:6px"></div><div class="muted">Start: click twice to rotate. “Export” saves your current blocks as the reference solution.</div></div>
+ <div class="card lk"><div class="ct"><span>🔧 Chassis &amp; ports <span id="hwm" class="muted"></span></span><button id="bEq">⚡ Recommended</button></div><div class="hwg" id="hw"></div></div>
+</section>
+<section class="col">
+ <div class="card lk bar"><button id="run" class="ok">▶ Run</button><button id="step" class="pri">⏭ Step</button><button id="rst">↺ Reset</button>
+  <select id="spd" aria-label="Speed"><option value="500">0.5x</option><option value="250" selected>1x</option><option value="120">2x</option><option value="50">4x</option></select>
+  <button id="bSol" class="am notest">✨ Solution</button><button id="bClr">🗑 Clear</button></div>
+ <div class="card lk"><div class="ct"><span>🧩 Block library (click to insert after the selected row)</span></div><div class="pal" id="pal"></div></div>
+ <div class="card lk" style="flex:1"><div class="ct"><span>📜 Program</span><span class="mono"><span id="cnt"></span> · <span id="stp"></span></span></div><div id="ws"></div>
+  <div class="muted mono" style="margin-top:6px;display:flex;justify-content:space-between;gap:6px"><span id="log"></span><b id="stars" style="color:#fbbf24"></b></div></div>
+</section></main>
+<div id="mod" class="ov hid" role="dialog" aria-modal="true"><div class="md"><div class="mh"><b id="mt"></b><button id="mx">✕ Close</button></div><div class="mb" id="mb"></div></div></div>
+<script>
+/* ===== 1. CONSTANTS & CATALOGS ===== */
+const C=13,R=8,DX=[1,0,-1,0],DY=[0,1,0,-1],$=i=>document.getElementById(i),clone=o=>JSON.parse(JSON.stringify(o));
+const HW=[['ultra','Ultrasonic','S1'],['ir','IR Colour','S2'],['ldr','LDR Light','S3'],['bump','Touch Bumper','S4'],['dc','DC Motors','M1/M2'],['s180','180° Servo','SV1'],['s360','360° Servo','SV2'],['led','High-Beam LED','OUT1']];
+const HN=Object.fromEntries(HW.map(h=>[h[0],h[1]])),REQ={DRIVE:'dc',TURN:'dc',S180:'s180',S360:'s360',LED:'led'},CH={dist:'ultra',light:'ldr',color:'ir',bump:'bump'};
+const OPEN=['REP','WH','UG','IF'],COL={REP:'c',WH:'c',UG:'c',IF:'c',ELSE:'c',SETV:'g',CHV:'g',DRIVE:'a',TURN:'a',LED:'a',S180:'v',S360:'v',END:'c'};
+const PAL=[['REP','🔁 Repeat N times',{n:3}],['WH','⏳ While condition',{q:{s:'dist',o:'>',v:20}}],['UG','🔁 Repeat until goal',{}],['IF','❓ If condition',{q:{s:'dist',o:'<=',v:20}}],['ELSE','↔ Else',{}],['SETV','📦 Set counter n',{v:0}],['CHV','📦 Change n by',{by:1}],['DRIVE','⚙️ Drive',{d:'F'}],['TURN','🧭 Turn',{d:'L'}],['LED','💡 High-beam LED',{col:'GREEN'}],['S180','🦾 180° servo angle',{a:90}],['S360','🔄 360° servo spin',{m:'CW'}]];
+const DEF={dist:['<=',20],light:['<',30],color:['==','RED'],bump:['==','PRESSED'],var:['<',5]},NUMO=['<','<=','>','>=','==','!='];
+const VALS={dist:[20,40,60,80,120],light:[30,50,70],color:['BLACK','RED','BLUE','YELLOW','GREEN','WHITE'],bump:['PRESSED','CLEAR'],var:[0,1,2,3,4,5,6,7,8,9,10]};
+const MAXSTEPS=250;
+/* ===== 2. LEVELS (12, each mapped to a learning outcome) ===== */
+const border=()=>{const w=[];for(let x=0;x<C;x++)for(let y=0;y<R;y++)if(!x||!y||x==C-1||y==R-1)w.push({x,y});return w};
+const open=cs=>{const k=new Set(cs.map(c=>c+''));const w=border();for(let x=1;x<C-1;x++)for(let y=1;y<R-1;y++)if(!k.has([x,y]+''))w.push({x,y});return w};
+const row=(y,a,b)=>{const r=[];for(let x=a;x<=b;x++)r.push([x,y]);return r},colm=(x,a,b)=>{const r=[];for(let y=a;y<=b;y++)r.push([x,y]);return r};
+const LS=()=>open(row(6,1,10).concat(colm(10,1,5))),CO=()=>open(row(4,1,11));
+const mk=o=>Object.assign({walls:CO(),floors:[],dark:[],gates:[],doors:[],beacons:[],debris:[],start:{x:1,y:4,dir:0},goal:{x:11,y:4},lock:true,hw:['ultra','dc'],hint:''},o);
+const D={t:'DRIVE',d:'F'},E={t:'END'},UG={t:'UG'},EL={t:'ELSE'},TL={t:'TURN',d:'L'},CW={t:'S360',m:'CW'},ST={t:'S360',m:'STOP'};
+const I=(s,o,v)=>({t:'IF',q:{s,o,v}}),W=(s,o,v)=>({t:'WH',q:{s,o,v}}),REP=n=>({t:'REP',n}),LED={t:'LED',col:'GREEN'};
+const LSTART={x:1,y:6,dir:0},LGOAL={x:10,y:1};
+const BUILTIN=[
+mk({id:'l1',short:'Wall Stop',grade:'Grade 8',out:'Conditional logic (If / Else)',need:'IF',title:'Level 1: Wall Stop',desc:'Drive East, then turn Left when the wall is close, and reach the goal. Use the Ultrasonic sensor.',hint:'Repeat until goal → If distance <= 20 then Turn Left, Else Drive.',walls:LS(),start:LSTART,goal:LGOAL,hw:['ultra','bump','dc'],floors:row(6,1,10).map(c=>({x:c[0],y:6,c:'BLACK'})),solution:[UG,I('dist','<=',20),TL,EL,D,E,E]}),
+mk({id:'l2',short:'Counted Loop',grade:'Grade 8',out:'Repetition by counting',need:'REP',title:'Level 2: Count the Cells',desc:'The goal is exactly 10 cells away. Use ONE counted loop instead of ten Drive blocks.',hint:'Repeat 10 times → Drive forward.',hw:['dc'],solution:[REP(10),D,E]}),
+mk({id:'l3',short:'180° Gate',grade:'Grade 8',out:'Conditions + positional servo',need:'IF',title:'Level 3: Positional Servo Gate',desc:'A latch gate blocks the corridor. When it is close, set the 180° servo to 90° to lift it.',hint:'If distance <= 20 → servo 90°, Else Drive.',hw:['ultra','s180','dc'],gates:[{x:6,y:4,a:90}],solution:[UG,I('dist','<=',20),{t:'S180',a:90},EL,D,E,E]}),
+mk({id:'l4',short:'While Loop',grade:'Grade 8',out:'Repetition by condition (While)',need:'WH',title:'Level 4: Drive While Clear',desc:'Drive while the way ahead is clear, turn Left at the wall, then drive again to the goal.',hint:'While distance > 20 → Drive. Turn Left. Repeat the While.',walls:LS(),start:LSTART,goal:LGOAL,solution:[W('dist','>',20),D,E,TL,W('dist','>',20),D,E]}),
+mk({id:'l5',short:'IR Junction',grade:'Grade 8',out:'Sensor-driven decisions',need:'IF',title:'Level 5: Colour Junction',desc:'Follow the black line. When the IR sensor sees the RED marker, turn Left onto the spur.',hint:'Repeat until goal → If floor colour == RED then Turn Left. Then Drive.',walls:LS(),start:LSTART,goal:LGOAL,hw:['ir','dc'],floors:row(6,1,9).map(c=>({x:c[0],y:6,c:'BLACK'})).concat([{x:10,y:6,c:'RED'}]),solution:[UG,I('color','==','RED'),TL,E,D,E]}),
+mk({id:'l6',short:'360° Sweeper',grade:'Grade 8',out:'Continuous servo + conditions',need:'IF',title:'Level 6: Debris Sweeper',desc:'Two debris blocks clog the tunnel. A 360° servo can spin continuously: sweep, then STOP it.',hint:'If distance <= 20 → servo CW, then servo STOP. Else Drive.',hw:['ultra','s360','dc'],debris:[{x:5,y:4},{x:8,y:4}],solution:[UG,I('dist','<=',20),CW,ST,EL,D,E,E]}),
+mk({id:'l7',short:'Light Tunnel',grade:'Grade 9',out:'Light sensing + actuator',need:'IF',title:'Level 7: Light Tunnel',desc:'Inside the dark tunnel the LDR reads under 30%. Switch the LED on to open the optical gate.',hint:'If light < 30% → LED GREEN. Always Drive.',hw:['ldr','led','dc'],lock:false,dark:[4,5,6,7].map(x=>({x,y:4})),beacons:[{x:8,y:4}],solution:[UG,I('light','<',30),LED,E,D,E]}),
+mk({id:'l8',short:'Counter n',grade:'Grade 9',out:'Variables + While',need:'SETV',title:'Level 8: Variable Counter',desc:'The goal is 5 cells away. Set counter n to 0, then While n < 5: Drive and add 1 to n.',hint:'Set n = 0. While n < 5 → Drive, Change n by 1.',hw:['dc'],goal:{x:6,y:4},solution:[{t:'SETV',v:0},W('var','<',5),D,{t:'CHV',by:1},E]}),
+mk({id:'l9',short:'Winch Door',grade:'Grade 9',out:'Nested loops in conditions',need:'REP',title:'Level 9: Winch Door',desc:'The winch door needs 3 clockwise turns of the 360° servo. Nest a counted loop inside an If.',hint:'If distance <= 20 → Repeat 3 { servo CW }, servo STOP. Else Drive.',hw:['ultra','s360','dc'],doors:[{x:6,y:4,n:3}],solution:[UG,I('dist','<=',20),REP(3),CW,E,ST,EL,D,E,E]}),
+mk({id:'l10',short:'Dual Airlock',grade:'Grade 9',out:'Combining both servo types',need:'REP',title:'Level 10: Dual-Servo Airlock',desc:'Stage 1: latch gate (180° servo = 90°). Stage 2: winch door (2 CW turns). One program must handle both.',hint:'At each obstacle: servo180 → 90°, Repeat 2 { servo360 CW }, STOP.',hw:['ultra','s180','s360','dc'],lock:false,gates:[{x:4,y:4,a:90}],doors:[{x:8,y:4,n:2}],solution:[UG,I('dist','<=',20),{t:'S180',a:90},REP(2),CW,E,ST,EL,D,E,E]}),
+mk({id:'l11',short:'Debris Field',grade:'Grade 9',out:'Counted loop + While nested',need:'WH',title:'Level 11: Debris Field',desc:'Three debris blocks, evenly spaced. Nest a While inside a counted loop, then drive to the goal.',hint:'Repeat 3 { While dist > 20 Drive; sweep }. Then Repeat until goal Drive.',hw:['ultra','s360','dc'],goal:{x:10,y:4},debris:[3,5,7].map(x=>({x,y:4})),solution:[REP(3),W('dist','>',20),D,E,CW,ST,E,UG,D,E]}),
+mk({id:'l12',short:'Rescue Capstone',grade:'Grade 9',out:'Capstone: conditions, loops & sensors',need:'IF',title:'Level 12: Search & Rescue',desc:'Sweep debris at x=3, then cross the dark zone with the LED on to open the optical gate. Equip what you need!',hint:'Combine: If dist<=20 sweep; If light<30 LED; Drive.',hw:['ultra','ldr','s360','led','dc'],lock:false,debris:[{x:3,y:4}],dark:[6,7].map(x=>({x,y:4})),beacons:[{x:8,y:4}],solution:[UG,I('dist','<=',20),CW,ST,E,I('light','<',30),LED,E,D,E]})
+];
+/* ===== 3. STATE ===== */
+let levels=clone(BUILTIN),li=0,hw=new Set(),P=[],selI=-1,A={},r,E_,ex,WS,edit=false,brush='WALL',locked=false;
+let T={on:false,limit:0,t0:0,pin:'',done:false},STU={name:'',cls:'',code:''},batch=[],SID='S'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const lv=()=>levels[li],cnt=()=>P.filter(b=>b.t!='END').length,par=l=>l.par||(l.solution||[]).filter(b=>b.t!='END').length||8;
+function getRec(l){return A[l.id]||(A[l.id]={levelId:l.id,title:l.title,grade:l.grade,status:'Not Attempted',blocks:0,par:par(l),steps:0,collisions:0,stars:0,score:0,rubric:{correct:0,concept:0,efficiency:0,safety:0},attempts:0,hintViewed:false,solutionViewed:false,firstPassSuccess:false,hardware:[],program:[]})}
+/* ===== 4. SIMULATION ===== */
+const blocked=(x,y)=>x<0||y<0||x>=C||y>=R||WS.has(x+','+y)||E_.gates.some(g=>g.x==x&&g.y==y&&!g.open)||E_.doors.some(g=>g.x==x&&g.y==y&&!g.open)||E_.beacons.some(g=>g.x==x&&g.y==y&&!g.active)||E_.debris.some(g=>g.x==x&&g.y==y&&!g.cleared);
+function ultra(){for(let s=1;s<=12;s++)if(blocked(r.x+DX[r.dir]*s,r.y+DY[r.dir]*s))return s*20;return 240}
+const bump=()=>r.bumped||blocked(r.x+DX[r.dir],r.y+DY[r.dir]);
+function floor(){const L=lv();if(L.goal.x==r.x&&L.goal.y==r.y)return'GREEN';const f=(L.floors||[]).find(f=>f.x==r.x&&f.y==r.y);return f?f.c:'WHITE'}
+const light=()=>(lv().dark||[]).some(d=>d.x==r.x&&d.y==r.y)?15:85,goal=()=>r.x==lv().goal.x&&r.y==lv().goal.y;
+function ev(q){let a;switch(q.s){case'dist':a=ultra();break;case'light':a=light();break;case'color':a=floor();break;case'bump':a=bump()?'PRESSED':'CLEAR';break;default:a=r.n}
+ const v=q.v;switch(q.o){case'<':return a<v;case'<=':return a<=v;case'>':return a>v;case'>=':return a>=v;case'!=':return a!=v;default:return a==v}}
+function analyse(p){const st=[],m={end:{},els:{},opn:{}};for(let i=0;i<p.length;i++){const t=p[i].t;if(OPEN.includes(t))st.push(i);else if(t=='ELSE'){const o=st[st.length-1];if(o==null||p[o].t!='IF'||m.els[o]!=null)return null;m.els[o]=i;m.opn[i]=o}else if(t=='END'){const o=st.pop();if(o==null)return null;m.end[o]=i;m.opn[i]=o}}return st.length?null:m}
+function hud(){const h=k=>hw.has(k);$('hd').textContent=h('ultra')?ultra()+' cm':'—';$('hc').textContent=h('ir')?floor():'—';$('hl').textContent=h('ldr')?light()+'%':'—';$('hb').textContent=h('bump')?(bump()?'PRESSED':'clear'):'—';$('hn').textContent=r.n;$('hp').textContent=`(${r.x},${r.y}) ${'ESWN'[r.dir]} · ${r.col}`;$('hs').textContent=`${r.a}° | ${r.m}`}
+function toast(m,t='info'){const e=$('toast');if(!m){e.classList.add('hid');return}e.textContent=m;e.className='t-'+t}
+function reset(){stop();const L=lv();WS=new Set(L.walls.map(w=>w.x+','+w.y));const a=L.start.dir*Math.PI/2;
+ r={x:L.start.x,y:L.start.y,dir:L.start.dir,rx:L.start.x,ry:L.start.y,ang:a,angT:a,a:0,m:'STOP',sp:0,led:'OFF',n:0,col:0,bx:0,by:0,bumped:false,fl:0};
+ E_={gates:(L.gates||[]).map(g=>({...g,open:false})),doors:(L.doors||[]).map(g=>({...g,spins:0,open:false})),beacons:(L.beacons||[]).map(g=>({...g,active:false})),debris:(L.debris||[]).map(g=>({...g,cleared:false}))};
+ ex={pc:0,fr:[],steps:0,active:-1,done:false,run:false,t:null,M:null};toast();$('log').textContent='Ready.';$('stars').textContent='';$('stp').textContent='Steps: 0 / '+MAXSTEPS;hud();ws()}
+function stop(){if(ex&&ex.t)clearInterval(ex.t);if(ex){ex.run=false;ex.t=null}$('run').textContent='▶ Run'}
+function fail(m){ex.done=true;stop();toast(m,'bad');$('log').textContent=m;rec('Attempted');ws();return true}
+function bad(q){const m=CH[q.s];if(m&&!hw.has(m))return fail('Hardware missing: equip '+HN[m]+'.');return false}
+function prep(){if(locked)return false;if(ex.done)reset();if(ex.pc==0&&ex.steps==0){ex.M=analyse(P);if(!P.length){toast('Add some blocks first.','bad');return false}if(!ex.M){toast('Every Repeat / While / If needs its End, and Else must sit inside an If.','bad');return false}getRec(lv()).attempts++}return true}
+function tick(){let g=0;for(;;){if(goal())return win();if(ex.pc>=P.length){ex.done=true;stop();toast('Program ended before the goal.','info');rec('Attempted');return}
+ if(++g>600)return void fail('Infinite loop with no action. Put an action inside the loop.');
+ const i=ex.pc,b=P[i],M=ex.M;
+ switch(b.t){
+  case'REP':if(b.n<1)ex.pc=M.end[i]+1;else{ex.fr.push({i,k:b.n});ex.pc=i+1}continue;
+  case'WH':if(bad(b.q))return;ex.pc=ev(b.q)?i+1:M.end[i]+1;continue;
+  case'UG':ex.pc=i+1;continue;
+  case'IF':if(bad(b.q))return;ex.pc=ev(b.q)?i+1:(M.els[i]!=null?M.els[i]+1:M.end[i]+1);continue;
+  case'ELSE':ex.pc=M.end[M.opn[i]]+1;continue;
+  case'END':{const o=M.opn[i],t=P[o].t;if(t=='REP'){const f=ex.fr[ex.fr.length-1];if(--f.k>0)ex.pc=o+1;else{ex.fr.pop();ex.pc=i+1}}else if(t=='WH'||t=='UG')ex.pc=o;else ex.pc=i+1;continue}
+ }
+ return act(b)}}
+function act(b){const need=REQ[b.t];if(need&&!hw.has(need))return void fail('Hardware missing: equip '+HN[need]+'.');
+ if(ex.steps>=MAXSTEPS)return void fail('Step limit reached. Check your loop logic.');
+ ex.steps++;ex.active=ex.pc;$('stp').textContent=`Steps: ${ex.steps} / ${MAXSTEPS}`;let m='';
+ switch(b.t){
+  case'DRIVE':{const s=b.d=='F'?1:-1,nx=r.x+DX[r.dir]*s,ny=r.y+DY[r.dir]*s;
+   if(blocked(nx,ny)){r.bumped=true;r.col++;r.bx=DX[r.dir]*s*.25;r.by=DY[r.dir]*s*.25;
+    if(P.some(p=>p.q&&p.q.s=='bump')&&hw.has('bump')){m='Bumped at ('+nx+','+ny+') — bumper triggered.';break}
+    hud();return void fail(`💥 Collision at (${nx},${ny}). Use a sensor or servo first.`)}
+   r.bumped=false;r.x=nx;r.y=ny;m='Drove to ('+nx+','+ny+').';break}
+  case'TURN':r.bumped=false;r.dir=(r.dir+(b.d=='L'?3:1))%4;r.angT+=(b.d=='L'?-1:1)*Math.PI/2;m='Turned '+b.d+'.';break;
+  case'LED':r.led=b.col;m='LED '+b.col;if(b.col!='OFF')E_.beacons.forEach(k=>{if(Math.abs(k.x-r.x)+Math.abs(k.y-r.y)<=4)k.active=true});break;
+  case'S180':r.a=b.a;m='180° servo → '+b.a+'°';E_.gates.forEach(g=>{if(Math.abs(g.x-r.x)+Math.abs(g.y-r.y)<=1&&g.a==b.a){g.open=true;m+=' · gate unlocked!'}});break;
+  case'S360':r.m=b.m;m='360° servo '+b.m;if(b.m!='STOP'){const fx=r.x+DX[r.dir],fy=r.y+DY[r.dir];E_.debris.forEach(d=>{if(!d.cleared&&d.x==fx&&d.y==fy){d.cleared=true;m+=' · debris swept!'}});
+    if(b.m=='CW')E_.doors.forEach(d=>{if(Math.abs(d.x-r.x)+Math.abs(d.y-r.y)<=2&&!d.open){d.spins++;m+=` · winch ${d.spins}/${d.n}`;if(d.spins>=d.n){d.open=true;m+=' OPEN!'}}})}break;
+  case'SETV':r.n=b.v;m='n = '+r.n;break;
+  case'CHV':r.n+=b.by;m='n = '+r.n;break;
+ }
+ ex.pc++;$('log').textContent=`#${ex.steps}: ${m}`;hud();ws();if(goal())win()}
+function score(){const L=lv(),b=cnt(),p=par(L),u=new Set(P.map(x=>x.t));const rub={correct:40,concept:(!L.need||u.has(L.need))?20:0,efficiency:b<=p+1?20:b<=p+4?10:0,safety:r.col==0?20:r.col==1?10:0};return{r:rub,total:Object.values(rub).reduce((a,c)=>a+c,0)}}
+function win(){if(ex.done)return;ex.done=true;stop();const sc=score(),stars=sc.r.efficiency==20&&r.col==0?3:sc.r.efficiency>=10&&r.col<=1?2:1,tx='★'.repeat(stars)+'☆'.repeat(3-stars);
+ $('stars').textContent=tx+' · '+sc.total+'/100';rec('Passed',stars,sc);tabs();toast(`🎉 Goal reached in ${ex.steps} steps! ${tx}`,'ok');$('log').textContent='MISSION COMPLETE';ws()}
+function rec(st,stars,sc){const L=lv(),a=getRec(L);
+ if(st=='Passed'){const first=a.status!='Passed';if(first||sc.total>a.score)Object.assign(a,{status:'Passed',blocks:cnt(),steps:ex.steps,collisions:r.col,stars,score:sc.total,rubric:sc.r,hardware:[...hw],program:clone(P)});if(first)a.firstPassSuccess=a.attempts<=1}
+ else if(a.status!='Passed')Object.assign(a,{status:'Attempted',blocks:cnt(),steps:ex.steps,collisions:r.col,hardware:[...hw],program:clone(P)})}
+/* ===== 5. UI: tabs, hardware, library, program ===== */
+function tabs(){$('tabs').innerHTML=levels.map((l,i)=>{const a=A[l.id];return`<button data-l="${i}" class="${i==li?'on':''}">${a&&a.status=='Passed'?'✔ ':''}${i+1}. ${l.short||'Custom'}</button>`}).join('')}
+function hwr(){const L=lv();$('hw').innerHTML=HW.map(h=>`<button data-h="${h[0]}" class="${hw.has(h[0])?'on':''}">${hw.has(h[0])?'✅':'⬜'} ${h[2]} ${h[1]}</button>`).join('');$('hwm').textContent=L.lock?'🔒 locked':'🔓 adjustable'}
+const esc=s=>String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const sel=(i,k,o,cur,q)=>`<select data-i="${i}" data-k="${k}"${q?' data-q="1"':''}>${o.map(x=>{const[v,l]=Array.isArray(x)?x:[x,x];return`<option value="${esc(v)}"${v==cur?' selected':''}>${esc(l)}</option>`}).join('')}</select>`;
+const cond=(i,q)=>sel(i,'s',[['dist','Distance cm'],['light','Light %'],['color','Floor colour'],['bump','Bumper'],['var','Counter n']],q.s,1)+sel(i,'o',(q.s=='color'||q.s=='bump')?['==','!=']:NUMO,q.o,1)+sel(i,'v',VALS[q.s],q.v,1);
+function lab(b,i){switch(b.t){
+ case'REP':return'🔁 Repeat '+sel(i,'n',[1,2,3,4,5,6,8,10,12],b.n)+' times';case'WH':return'⏳ While '+cond(i,b.q);case'UG':return'🔁 Repeat until goal';
+ case'IF':return'❓ If '+cond(i,b.q);case'ELSE':return'↔ Else';case'END':return'End';case'SETV':return'📦 Set n = '+sel(i,'v',[0,1,2,3,4,5],b.v);
+ case'CHV':return'📦 Change n by '+sel(i,'by',[1,2,-1,-2],b.by);case'DRIVE':return'⚙️ Drive '+sel(i,'d',[['F','forward'],['B','backward']],b.d);
+ case'TURN':return'🧭 Turn '+sel(i,'d',[['L','left 90°'],['R','right 90°']],b.d);case'LED':return'💡 LED '+sel(i,'col',['GREEN','RED','BLUE','OFF'],b.col);
+ case'S180':return'🦾 180° servo → '+sel(i,'a',[0,45,90,135,180],b.a)+'°';case'S360':return'🔄 360° servo '+sel(i,'m',['CW','CCW','STOP'],b.m)}return b.t}
+function ws(){$('cnt').textContent='Blocks: '+cnt();let d=0;$('ws').innerHTML=P.map((b,i)=>{if(b.t=='END'||b.t=='ELSE')d=Math.max(0,d-1);const ind=d;if(OPEN.includes(b.t)||b.t=='ELSE')d++;
+ return`<div class="row ${COL[b.t]}${ex&&i==ex.active?' act':''}${i==selI?' sel':''}" data-r="${i}" style="margin-left:${ind*16}px"><span>${i+1}. ${lab(b,i)}</span><span class="ra"><button data-a="u" data-i="${i}" aria-label="Move up">▲</button><button data-a="d" data-i="${i}" aria-label="Move down">▼</button><button data-a="x" data-i="${i}" aria-label="Delete">✕</button></span></div>`}).join('')||'<p class="muted">Empty program — insert blocks from the library.</p>'}
+function edited(){reset()}
+$('pal').innerHTML=PAL.map((p,i)=>`<button class="${COL[p[0]]}" data-p="${i}">${p[1]}</button>`).join('');
+$('pal').onclick=e=>{const b=e.target.closest('[data-p]');if(!b||locked)return;const p=PAL[+b.dataset.p],blk={t:p[0],...clone(p[2])},at=selI+1;
+ if(OPEN.includes(p[0])){P.splice(at,0,blk,{t:'END'});selI=at}else{P.splice(at,0,blk);selI=at}edited()};
+$('ws').onclick=e=>{if(locked)return;const a=e.target.closest('[data-a]');
+ if(a){const i=+a.dataset.i;if(a.dataset.a=='u'&&i>0)[P[i-1],P[i]]=[P[i],P[i-1]];if(a.dataset.a=='d'&&i<P.length-1)[P[i+1],P[i]]=[P[i],P[i+1]];
+  if(a.dataset.a=='x'){const m=analyse(P),rm=new Set([i]);if(m&&OPEN.includes(P[i].t)){rm.add(m.end[i]);if(m.els[i]!=null)rm.add(m.els[i])}P=P.filter((_,k)=>!rm.has(k));selI=Math.min(selI,P.length-1)}
+  return edited()}
+ if(e.target.tagName=='SELECT')return;const rw=e.target.closest('[data-r]');if(rw){selI=+rw.dataset.r;ws()}};
+$('ws').onchange=e=>{const s=e.target;if(s.tagName!='SELECT'||locked)return;const b=P[+s.dataset.i],v=/^-?\d+$/.test(s.value)?+s.value:s.value;
+ if(s.dataset.q){if(s.dataset.k=='s')b.q={s:v,o:DEF[v][0],v:DEF[v][1]};else b.q[s.dataset.k]=v}else b[s.dataset.k]=v;edited()};
+$('tabs').onclick=e=>{const b=e.target.closest('[data-l]');if(b&&!locked)load(+b.dataset.l)};
+$('hw').onclick=e=>{const b=e.target.closest('[data-h]');if(!b)return;if(lv().lock&&!edit)return toast('🔒 Hardware is locked for this puzzle.','info');if(hw.has(b.dataset.h))hw.delete(b.dataset.h);else hw.add(b.dataset.h);hwr();reset()};
+function load(i,keep){stop();li=i;const L=lv();hw=new Set(L.hw||[]);$('lt').textContent=L.title;$('lg').textContent=L.grade;$('lo').textContent=`Outcome: ${L.out||'Custom'} · Par ${par(L)} blocks`;$('ld').textContent=L.desc;$('hint').textContent=L.hint||'Sense → Decide → Act.';$('hint').classList.add('hid');
+ $('eT').value=L.title;$('eG').value=L.grade;$('eP').value=par(L);$('eN').value=L.need||'';$('eD').value=L.desc;$('eL').checked=!!L.lock;
+ if(!keep){const a=A[L.id];P=a&&a.program&&a.program.length?clone(a.program):[{t:'UG'},{t:'DRIVE',d:'F'},{t:'END'}];selI=-1}tabs();hwr();reset()}
+/* ===== 6. CONTROLS ===== */
+$('run').onclick=()=>{if(ex.run)return stop();if(!prep())return;ex.run=true;$('run').textContent='⏸ Pause';toast();ex.t=setInterval(tick,+$('spd').value)};
+$('spd').onchange=()=>{if(ex.run){clearInterval(ex.t);ex.t=setInterval(tick,+$('spd').value)}};
+$('step').onclick=()=>{stop();if(prep())tick()};$('rst').onclick=reset;
+$('bClr').onclick=()=>{if(locked)return;P=[];selI=-1;edited()};
+$('bHint').onclick=()=>{$('hint').classList.toggle('hid');getRec(lv()).hintViewed=true};
+$('bSol').onclick=()=>{if(locked||T.on)return;const L=lv();getRec(L).solutionViewed=true;hw=new Set(L.hw);P=clone(L.solution||[]);selI=-1;hwr();reset();toast('Reference solution loaded — press Run.','info')};
+$('bEq').onclick=()=>{hw=new Set(lv().hw);hwr();reset()};
+$('bTh').onclick=()=>theme(document.documentElement.dataset.theme=='dark'?'light':'dark');
+function theme(t){document.documentElement.dataset.theme=t;$('bTh').textContent=t=='dark'?'☀️':'🌙';try{localStorage.setItem('sgs_theme',t)}catch(_){}}
+/* ===== 7. MODALS, TEST MODE, ASSESSMENT ===== */
+function modal(t,h){$('mt').textContent=t;$('mb').innerHTML=h;$('mod').classList.remove('hid')}
+$('mx').onclick=()=>$('mod').classList.add('hid');
+function sum(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).toUpperCase().padStart(8,'0')}
+function dl(n,txt,mime){const u=URL.createObjectURL(new Blob([txt],{type:mime}));const a=document.createElement('a');a.href=u;a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
+const safe=s=>String(s||'x').replace(/[^a-z0-9_-]/gi,'_'),csv=rows=>rows.map(x=>x.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+const mm=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function payload(auto){const L=lv(),a=getRec(L);if(a.status!='Passed'){a.program=clone(P);a.blocks=cnt();a.hardware=[...hw];if(a.status=='Not Attempted'&&a.attempts>0)a.status='Attempted'}
+ const ls=levels.map(l=>clone(getRec(l))),el=T.on?Math.min(T.limit||1e9,Math.floor(((T.end||Date.now())-T.t0)/1000)):0;
+ const d={format:'ServoGateSensorSprint_Assessment_v4',sessionId:SID,submittedAt:new Date().toISOString(),student:{name:STU.name||'Anonymous',classGroup:STU.cls||'Grade_8_9',assignmentCode:STU.code||'GENERAL'},
+ test:{timeLimitSec:T.on?T.limit:0,timeElapsedSec:el,timeRemainingSec:T.on&&T.limit?Math.max(0,T.limit-el):0,autoSubmittedOnTimeout:!!auto},
+ summary:{levelsPassed:ls.filter(x=>x.status=='Passed').length,totalLevels:ls.length,totalStars:ls.reduce((s,x)=>s+x.stars,0),totalScore:ls.reduce((s,x)=>s+x.score,0),maxScore:ls.length*100},levels:ls};
+ d.integrityChecksum=sum(JSON.stringify(d));return d}
+const fname=(d,x)=>`assessment_${safe(d.student.classGroup)}_${safe(d.student.name)}_${d.submittedAt.slice(0,10)}.${x}`;
+const studentCsv=d=>csv([['Student','Class','Code','Level','Status','Blocks','Par','Steps','Bumps','Stars','Correct','Concept','Efficiency','Safety','Score','Attempts','HintViewed','SolutionViewed','FirstPass']].concat(d.levels.map(l=>[d.student.name,d.student.classGroup,d.student.assignmentCode,l.title,l.status,l.blocks,l.par,l.steps,l.collisions,l.stars,l.rubric.correct,l.rubric.concept,l.rubric.efficiency,l.rubric.safety,l.score,l.attempts,l.hintViewed,l.solutionViewed,l.firstPassSuccess])));
+function showOut(d,msg){modal('📤 Assessment package',`<p>${esc(msg||'')}</p><p class="muted">The checksum is a classroom integrity check (it detects accidental or casual edits). Browser-only code cannot give cryptographic, tamper-proof signing.</p><textarea id="oj" class="mono" readonly></textarea><div class="bar"><button id="oD" class="ok">💾 Download .json</button><button id="oC" class="pri">📋 Copy JSON</button><button id="oV">📊 Download .csv</button></div><p class="muted">Online: paste the copied JSON into Google Forms, Moodle, Canvas or Teams. Offline: hand in the .json file.</p>`);
+ $('oj').value=JSON.stringify(d,null,2);$('oD').onclick=()=>dl(fname(d,'json'),$('oj').value,'application/json');$('oV').onclick=()=>dl(fname(d,'csv'),studentCsv(d),'text/csv');
+ $('oC').onclick=()=>{const t=$('oj');t.select();try{navigator.clipboard.writeText(t.value)}catch(_){document.execCommand('copy')}toast('📋 JSON copied.','ok')}}
+function assess(){const tb=levels.map(l=>{const a=getRec(l);return`<tr><td>${esc(l.short||l.title)}</td><td>${a.status}</td><td>${a.blocks} (${a.par})</td><td>${a.steps}</td><td>${a.collisions}</td><td>${a.score}</td><td>${a.attempts}${a.hintViewed?' 💡':''}${a.solutionViewed?' ✨':''}</td></tr>`}).join('');
+ modal('📋 Assessment',`<div class="bar"><button id="vS" class="on">👩‍🎓 Student</button><button id="vT">👨‍🏫 Teacher grading</button></div>
+ <div id="sv"><div class="fl"><div><label>Full name *</label><input id="sn" value="${esc(STU.name)}"></div><div><label>Class *</label><input id="sc" value="${esc(STU.cls)}"></div><div><label>Assignment code</label><input id="sk" value="${esc(STU.code)}"></div></div>
+ <div style="overflow:auto"><table><tr><th>Level</th><th>Status</th><th>Blocks (par)</th><th>Steps</th><th>Bumps</th><th>Score /100</th><th>Tries</th></tr>${tb}</table></div>
+ <p class="muted">Score = Correctness 40 + Concept use 20 + Efficiency vs par 20 + Safety (no collisions) 20.</p><button id="sub" class="ok">📤 Prepare submission</button></div>
+ <div id="tv" class="hid"><p class="muted">Select one or many student .json files (or paste one). Checksums are verified and a class table is built.</p><input type="file" id="gf" accept=".json" multiple><textarea id="gp" class="mono" placeholder="…or paste a student JSON here" style="min-height:70px"></textarea><div class="bar"><button id="gi" class="pri">🔍 Inspect</button><button id="gc">📊 Class CSV</button></div><div id="gr" style="overflow:auto"></div></div>`);
+ ['sn','sc','sk'].forEach((k,i)=>$(k).oninput=()=>{STU[['name','cls','code'][i]]=$(k).value});
+ $('vS').onclick=()=>{$('sv').classList.remove('hid');$('tv').classList.add('hid');$('vS').classList.add('on');$('vT').classList.remove('on')};
+ $('vT').onclick=()=>{$('tv').classList.remove('hid');$('sv').classList.add('hid');$('vT').classList.add('on');$('vS').classList.remove('on')};
+ $('sub').onclick=()=>showOut(payload(false),'Review and submit your work.');
+ $('gf').onchange=async e=>{batch=[];for(const f of e.target.files)batch.push(...parseSub(await f.text(),f.name));grid()};
+ $('gi').onclick=()=>{batch=parseSub($('gp').value,'pasted');grid()};
+ $('gc').onclick=()=>{if(!batch.length)return;const n=Math.max(...batch.map(b=>b.d.levels?b.d.levels.length:0));dl('class_summary_'+new Date().toISOString().slice(0,10)+'.csv',csv([['Student','Class','Code','Levels passed','Stars','Score','Max','Time used (s)','Auto-submitted','Checksum OK'].concat(Array.from({length:n},(_,i)=>'L'+(i+1)+' score'))].concat(batch.filter(b=>b.ok!==null).map(b=>{const d=b.d;return[d.student.name,d.student.classGroup,d.student.assignmentCode,d.summary.levelsPassed,d.summary.totalStars,d.summary.totalScore,d.summary.maxScore,d.test?d.test.timeElapsedSec:'',d.test?d.test.autoSubmittedOnTimeout:'',b.ok].concat(d.levels.map(l=>l.score))}))),'text/csv')}}
+function parseSub(txt,name){try{const d=JSON.parse(txt);if(!d.student||!Array.isArray(d.levels))throw 0;const c=d.integrityChecksum,k=clone(d);delete k.integrityChecksum;return[{d,ok:sum(JSON.stringify(k))==c,name}]}catch(_){return[{d:null,ok:null,name}]}}
+function grid(){$('gr').innerHTML='<table><tr><th>Student</th><th>Class</th><th>Passed</th><th>Stars</th><th>Score</th><th>Time</th><th>Integrity</th><th>Replay</th></tr>'+batch.map((b,bi)=>{if(!b.d)return`<tr><td colspan="8">⚠️ Invalid file: ${esc(b.name)}</td></tr>`;const d=b.d,t=d.test||{};
+ return`<tr><td>${esc(d.student.name)}</td><td>${esc(d.student.classGroup)}</td><td>${d.summary.levelsPassed}/${d.levels.length}</td><td>${d.summary.totalStars}</td><td>${d.summary.totalScore}/${d.summary.maxScore}</td><td>${t.timeElapsedSec!=null?mm(t.timeElapsedSec):'-'}${t.autoSubmittedOnTimeout?' ⏱':''}</td><td>${b.ok?'✔ '+d.integrityChecksum:'⚠️ edited'}</td><td>${d.levels.map((l,i)=>l.program&&l.program.length?`<button data-b="${bi}" data-i="${i}" title="${esc(l.status)}">${i+1}</button>`:'').join('')}</td></tr>`}).join('')+'</table>';
+ $('gr').onclick=e=>{const b=e.target.closest('[data-b]');if(!b)return;const rc=batch[+b.dataset.b].d.levels[+b.dataset.i],ix=levels.findIndex(l=>l.id==rc.levelId);if(ix<0)return toast('Level not found — import the level pack first.','bad');
+  $('mod').classList.add('hid');load(ix,true);hw=new Set(rc.hardware||[]);P=clone(rc.program);selI=-1;hwr();reset();toast(`Replaying ${batch[+b.dataset.b].d.student.name}: press Run.`,'info')}}
+$('bAss').onclick=assess;
+/* Test mode */
+$('bTest').onclick=()=>{if(!T.on)modal('⏱ Test Mode',`<p class="muted">Hides Hint, Solution and Builder; counts attempts; locks and auto-submits at 00:00.</p><div class="fl"><div><label>Time limit</label><select id="tl"><option value="0">Off (no timer)</option><option value="5">5 min</option><option value="10">10 min</option><option value="15" selected>15 min</option><option value="20">20 min</option><option value="30">30 min</option><option value="c">Custom…</option></select></div><div><label>Custom minutes</label><input id="tc" type="number" min="1" max="180" value="45"></div><div><label>Teacher PIN (to end test)</label><input id="tp" value="1234"></div></div><button id="ts" class="ok">▶ Start test</button>`),
+ $('ts').onclick=()=>{let m=$('tl').value;m=m=='c'?+$('tc').value||15:+m;T={on:true,limit:m*60,t0:Date.now(),pin:$('tp').value||'1234',done:false};document.body.classList.add('testing');$('clk').classList.remove('hid');if(edit)$('bEd').click();$('mod').classList.add('hid');toast('Test started. Good luck!','info')};
+ else modal('Test in progress',`<p>Enter the teacher PIN to end the test and unlock hints, solutions and the builder.</p><input id="te" type="password" placeholder="PIN"><button id="tx" class="am">End test</button><p id="tm" class="muted"></p>`),
+ $('tx')&&($('tx').onclick=()=>{if($('te').value!=T.pin)return $('tm').textContent='Wrong PIN.';T.on=false;locked=false;document.body.classList.remove('testing','locked');$('clk').classList.add('hid');$('mod').classList.add('hid');toast('Test ended.','info')})};
+setInterval(()=>{if(!T.on||T.done)return;if(!T.limit){$('clk').textContent='TEST';return}const rem=Math.max(0,Math.ceil(T.limit-(Date.now()-T.t0)/1000));$('clk').textContent='⏱ '+mm(rem);$('clk').classList.toggle('urg',rem<=60);if(rem<=0)timeout()},500);
+function timeout(){T.done=true;T.end=Date.now();stop();locked=true;document.body.classList.add('locked');const d=payload(true);dl(fname(d,'json'),JSON.stringify(d,null,2),'application/json');showOut(d,"⏱ Time is up! Your work is locked and was submitted automatically. Give the downloaded .json (or the text below) to your teacher.")}
+/* ===== 8. TEACHER LEVEL BUILDER ===== */
+const BR=[['START','🤖 Start'],['GOAL','🏁 Goal'],['WALL','🧱 Wall'],['BLACK','⬛ Black'],['RED','🟥 Red'],['BLUE','🟦 Blue'],['DARK','🌑 Dark'],['GATE','🦾 180° gate'],['DOOR','🔄 360° door'],['BEACON','💡 LED gate'],['DEBRIS','📦 Debris'],['ERASE','🧹 Erase']];
+function brushes(){$('brush').innerHTML=BR.map(b=>`<button data-b="${b[0]}" class="${brush==b[0]?'on':''}">${b[1]}</button>`).join('')}
+$('brush').onclick=e=>{const b=e.target.closest('[data-b]');if(b){brush=b.dataset.b;brushes()}};
+$('bEd').onclick=()=>{edit=!edit;$('ed').classList.toggle('hid',!edit);$('bEd').classList.toggle('on',edit);if(edit){hw=hw;toast('Builder ON — click the arena to paint.','info')}else toast()};
+$('cv').onclick=e=>{if(!edit||locked)return;const q=$('cv').getBoundingClientRect(),gx=Math.floor((e.clientX-q.left)/q.width*C),gy=Math.floor((e.clientY-q.top)/q.height*R),L=lv();if(gx<0||gy<0||gx>=C||gy>=R)return;
+ ['walls','floors','dark','gates','doors','beacons','debris'].forEach(k=>L[k]=(L[k]||[]).filter(o=>!(o.x==gx&&o.y==gy)));const p={x:gx,y:gy};
+ switch(brush){case'START':if(L.start.x==gx&&L.start.y==gy)L.start.dir=(L.start.dir+1)%4;else L.start={x:gx,y:gy,dir:0};break;case'GOAL':L.goal=p;break;case'WALL':L.walls.push(p);break;
+  case'BLACK':case'RED':case'BLUE':L.floors.push({...p,c:brush});break;case'DARK':L.dark.push(p);break;case'GATE':L.gates.push({...p,a:+$('eA').value||90});break;case'DOOR':L.doors.push({...p,n:+$('eS').value||2});break;case'BEACON':L.beacons.push(p);break;case'DEBRIS':L.debris.push(p)}
+ reset()};
+['eT','eG','eP','eN','eD'].forEach(id=>$(id).oninput=()=>{const L=lv();L.title=$('eT').value;L.grade=$('eG').value;L.par=+$('eP').value||undefined;L.need=$('eN').value;L.desc=$('eD').value;$('lt').textContent=L.title;$('lg').textContent=L.grade;$('ld').textContent=L.desc;$('lo').textContent=`Outcome: ${L.out||'Custom'} · Par ${par(L)} blocks`;tabs()});
+$('eL').onchange=()=>{const L=lv();L.lock=$('eL').checked;L.hw=[...hw];hwr()};
+const finalise=()=>{const L=lv();L.hw=[...hw];L.solution=clone(P);return L};
+$('eNew').onclick=()=>{const n=levels.length+1;levels.push(mk({id:'c'+Date.now(),short:'Custom',title:'Level '+n+': Custom Challenge',grade:'Grade 8',out:'Custom',need:'',desc:'Reach the goal using sensors, loops and servos.',lock:false,hw:['ultra','bump','dc'],walls:border(),solution:[UG,D,E]}));load(levels.length-1)};
+$('eClr').onclick=()=>{const L=lv();Object.assign(L,{walls:border(),floors:[],dark:[],gates:[],doors:[],beacons:[],debris:[]});reset()};
+$('eExp').onclick=()=>{const L=finalise();modal('Export level JSON',`<textarea id="jt" class="mono" readonly></textarea><button id="jc" class="pri">📋 Copy</button><button id="jd">💾 Download</button>`);$('jt').value=JSON.stringify(L,null,2);$('jc').onclick=()=>{$('jt').select();document.execCommand('copy')};$('jd').onclick=()=>dl('level_'+safe(L.id)+'.json',$('jt').value,'application/json')};
+$('eExpAll').onclick=()=>{finalise();modal('Export level pack',`<p class="muted">All levels in one file. Give it to students to load via Import so every machine has the same levels.</p><textarea id="jt" class="mono" readonly></textarea><button id="jd" class="pri">💾 Download pack</button>`);$('jt').value=JSON.stringify(levels,null,2);$('jd').onclick=()=>dl('level_pack.json',$('jt').value,'application/json')};
+$('eImp').onclick=()=>{modal('Import level / pack',`<p class="muted">Paste JSON or choose a file. A single level or a pack (array) both work.</p><input type="file" id="jf" accept=".json"><textarea id="jt" class="mono"></textarea><button id="ja" class="ok">✔ Load</button><p id="jm" class="muted"></p>`);
+ $('jf').onchange=async e=>{$('jt').value=await e.target.files[0].text()};
+ $('ja').onclick=()=>{try{const x=JSON.parse($('jt').value),arr=Array.isArray(x)?x:[x];arr.forEach(l=>{if(!l.start||!l.goal||!Array.isArray(l.walls))throw new Error('Not a valid level.');['floors','dark','gates','doors','beacons','debris'].forEach(k=>l[k]=l[k]||[]);l.hw=l.hw||['ultra','dc'];l.id=levels.some(z=>z.id==l.id)?l.id+'_'+Date.now():(l.id||'c'+Date.now());levels.push(l)});$('mod').classList.add('hid');load(levels.length-1);toast('Imported '+arr.length+' level(s).','ok')}catch(er){$('jm').textContent='⚠️ '+er.message}}};
+/* ===== 9. GUIDE ===== */
+$('bWiki').onclick=()=>modal('📚 Robot parts',HW.map(h=>`<div class="card"><b class="mono">${h[2]}</b> ${h[1]} — <a style="color:var(--ac)" target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/${{ultra:'Ultrasonic_transducer',ir:'Infrared_sensor',ldr:'Photoresistor',bump:'Limit_switch',dc:'DC_motor',s180:'Servomotor',s360:'Servomotor',led:'Light-emitting_diode'}[h[0]]}">Wikipedia ↗</a></div>`).join('')+'<p class="muted">Loops: Repeat N (counting), While and Repeat-until-goal (conditions). Counter n is the Grade 9 variable.</p>');
+/* ===== 10. GRAPHICS ===== */
+function rr(x,a,b,w,h,rad){x.beginPath();x.roundRect?x.roundRect(a,b,w,h,rad):x.rect(a,b,w,h)}
+function draw(){const cv=$('cv'),x=cv.getContext('2d'),w=cv.width,h=cv.height,cw=w/C,ch=h/R,L=lv(),lt=document.documentElement.dataset.theme=='light',tm=Date.now()/1000;
+ x.clearRect(0,0,w,h);for(let a=0;a<C;a++)for(let b=0;b<R;b++){x.fillStyle=(a+b)%2?(lt?'#dbe4ee':'#0f172a'):(lt?'#e5ecf4':'#0b1120');x.fillRect(a*cw,b*ch,cw,ch)}
+ const FC={BLACK:'#334155',RED:'#ef4444',BLUE:'#3b82f6',YELLOW:'#eab308'};(L.floors||[]).forEach(f=>{x.fillStyle=FC[f.c]||'#64748b';x.globalAlpha=f.c=='BLACK'?.8:.45;x.fillRect(f.x*cw+3,f.y*ch+3,cw-6,ch-6);x.globalAlpha=1});
+ (L.dark||[]).forEach(d=>{const g=x.createRadialGradient((d.x+.5)*cw,(d.y+.5)*ch,2,(d.x+.5)*cw,(d.y+.5)*ch,cw*.8);g.addColorStop(0,'rgba(15,23,42,.55)');g.addColorStop(1,'rgba(2,6,23,.9)');x.fillStyle=g;x.fillRect(d.x*cw,d.y*ch,cw,ch);x.fillStyle='#a5b4fc';x.font=`bold ${cw*.12}px monospace`;x.textAlign='center';x.fillText('DARK 15%',(d.x+.5)*cw,(d.y+.25)*ch)});
+ (L.walls||[]).forEach(q=>{const px=q.x*cw,py=q.y*ch,g=x.createLinearGradient(px,py,px,py+ch);g.addColorStop(0,lt?'#64748b':'#2b3a55');g.addColorStop(1,lt?'#475569':'#1a2438');x.fillStyle=g;x.fillRect(px,py,cw,ch);x.fillStyle='rgba(255,255,255,.08)';x.fillRect(px,py,cw,3);x.strokeStyle='rgba(0,0,0,.35)';x.strokeRect(px+.5,py+.5,cw-1,ch-1)});
+ const gx=(L.goal.x+.5)*cw,gy=(L.goal.y+.5)*ch,gr=Math.min(cw,ch)*(.34+.03*Math.sin(tm*3));x.fillStyle='rgba(16,185,129,.28)';x.beginPath();x.arc(gx,gy,gr*1.3,0,7);x.fill();x.fillStyle='#10b981';x.beginPath();x.arc(gx,gy,gr,0,7);x.fill();x.fillStyle='#022c22';x.font=`bold ${cw*.14}px sans-serif`;x.textAlign='center';x.textBaseline='middle';x.fillText('GOAL',gx,gy);
+ const box=(o,fill,txt,pad=.1)=>{x.fillStyle=fill;rr(x,o.x*cw+cw*pad,o.y*ch+ch*pad,cw*(1-2*pad),ch*(1-2*pad),6);x.fill();x.fillStyle='#fff';x.font=`bold ${cw*.12}px monospace`;x.textAlign='center';x.textBaseline='middle';x.fillText(txt,(o.x+.5)*cw,(o.y+.5)*ch)};
+ const ghost=(o)=>{x.strokeStyle='#10b981';x.setLineDash([5,5]);x.strokeRect(o.x*cw+6,o.y*ch+6,cw-12,ch-12);x.setLineDash([])};
+ E_.gates.forEach(g=>g.open?ghost(g):box(g,'#ea580c',g.a+'°',.2));E_.doors.forEach(d=>d.open?ghost(d):box(d,'#d97706',`${d.spins}/${d.n}`));
+ E_.beacons.forEach(b=>{if(b.active){ghost(b);x.fillStyle='rgba(250,204,21,.25)';x.beginPath();x.arc((b.x+.5)*cw,(b.y+.5)*ch,cw*.4,0,7);x.fill()}else box(b,'rgba(220,38,38,.7)','LED GATE')});
+ E_.debris.forEach(d=>{if(!d.cleared)box(d,'#92400e','DEBRIS',.14)});
+ r.rx+=(r.x-r.rx)*.3;r.ry+=(r.y-r.ry)*.3;r.ang+=(r.angT-r.ang)*.3;r.bx*=.8;r.by*=.8;if(r.m=='CW')r.sp+=.2;if(r.m=='CCW')r.sp-=.2;
+ const cx=(r.rx+.5+r.bx)*cw,cy=(r.ry+.5+r.by)*ch,s=Math.min(cw,ch)*.34;x.save();x.translate(cx,cy);x.rotate(r.ang);
+ if(hw.has('ultra')){const d=Math.min(ultra()/20,3.2)*cw*.6;const g=x.createLinearGradient(s,0,s+d,0);g.addColorStop(0,'rgba(45,212,191,.4)');g.addColorStop(1,'rgba(45,212,191,0)');x.fillStyle=g;x.beginPath();x.moveTo(s*.8,0);x.arc(s*.8,0,d,-.3,.3);x.fill()}
+ if(hw.has('dc')){x.fillStyle='#0b1220';rr(x,-s*.7,-s-5,s*1.4,7,3);x.fill();rr(x,-s*.7,s-2,s*1.4,7,3);x.fill()}
+ const bg=x.createLinearGradient(0,-s,0,s);bg.addColorStop(0,'#60a5fa');bg.addColorStop(1,'#1d4ed8');x.fillStyle=bg;x.strokeStyle='#dbeafe';x.lineWidth=2;rr(x,-s*.85,-s*.85,s*1.7,s*1.7,8);x.fill();x.stroke();
+ x.fillStyle='#0f172a';x.beginPath();x.arc(s*.55,-s*.3,3,0,7);x.arc(s*.55,s*.3,3,0,7);x.fill();
+ if(hw.has('ir')){x.fillStyle=floor()=='WHITE'?'#e2e8f0':(FC[floor()]||'#10b981');x.fillRect(s*.1,-3,6,6)}
+ if(hw.has('ldr')){x.fillStyle='#fde68a';x.beginPath();x.arc(-s*.4,-s*.5,3,0,7);x.fill()}
+ if(hw.has('bump')){x.strokeStyle=bump()?'#ef4444':'#f8fafc';x.lineWidth=3;x.beginPath();x.moveTo(s*.95,-s*.6);x.lineTo(s*.95,s*.6);x.stroke()}
+ if(hw.has('s180')){x.save();x.rotate((-90+r.a)*Math.PI/180);x.fillStyle='#fb923c';x.fillRect(0,-3,s*1.4,6);x.restore()}
+ if(hw.has('s360')){x.save();x.translate(-s*.35,0);x.rotate(r.sp);x.strokeStyle='#fbbf24';x.lineWidth=3;x.beginPath();x.arc(0,0,s*.38,0,7);x.moveTo(-s*.38,0);x.lineTo(s*.38,0);x.moveTo(0,-s*.38);x.lineTo(0,s*.38);x.stroke();x.restore()}
+ if(hw.has('led')){x.shadowColor=r.led=='OFF'?'transparent':r.led;x.shadowBlur=r.led=='OFF'?0:18;x.fillStyle={OFF:'#334155',GREEN:'#10b981',RED:'#ef4444',BLUE:'#38bdf8'}[r.led];x.beginPath();x.arc(s*.1,0,5,0,7);x.fill();x.shadowBlur=0}
+ x.restore();requestAnimationFrame(draw)}
+function size(){const q=$('cv').parentElement.getBoundingClientRect(),d=window.devicePixelRatio||1;$('cv').width=q.width*d;$('cv').height=q.height*d}
+addEventListener('resize',size);
+/* ===== 11. START ===== */
+(function(){let t=matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';try{t=localStorage.getItem('sgs_theme')||t}catch(_){}theme(t);size();brushes();load(0);draw()})();
+</script></body></html>
